@@ -107,8 +107,6 @@ export function Grid({ searchQuery }: GridProps) {
         ])
         addToast('Claimed!', 'success')
       }
-      // Wait briefly for GitHub API cache to settle before refreshing
-      await new Promise(r => setTimeout(r, 1500))
       await refresh()
     } catch (err) {
       console.error('Square claim error:', err)

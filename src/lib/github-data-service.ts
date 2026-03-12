@@ -1,31 +1,66 @@
-import { Octokit } from '@octokit/rest'
-import { GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH, GITHUB_PAT, RAW_BASE } from './config'
+import { supabase } from './supabase'
 import type { Config, User, Square, Game } from './types'
 
-const octokit = new Octokit({ auth: GITHUB_PAT })
-
-// === Reads (raw.githubusercontent.com, no auth needed) ===
-
-async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${RAW_BASE}/data/${path}?t=${Date.now()}`)
-  if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
-  return res.json()
-}
+// === Reads ===
 
 export async function getConfig(): Promise<Config> {
-  return fetchJson<Config>('config.json')
+  const { data, error } = await supabase
+    .from('config')
+    .select('*')
+    .eq('id', 1)
+    .single()
+  if (error) throw error
+  return {
+    boardLocked: data.board_locked,
+    maxSquaresPerPerson: data.max_squares_per_person,
+    rowNumbers: data.row_numbers,
+    colNumbers: data.col_numbers,
+  }
 }
 
 export async function getUsers(): Promise<User[]> {
-  return fetchJson<User[]>('users.json')
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at')
+  if (error) throw error
+  return (data ?? []).map(u => ({
+    id: u.id,
+    name: u.name,
+    code: u.code,
+    admin: u.admin,
+    paid: u.paid,
+    createdAt: u.created_at,
+  }))
 }
 
 export async function getSquares(): Promise<Square[]> {
-  return fetchJson<Square[]>('squares.json')
+  const { data, error } = await supabase
+    .from('squares')
+    .select('*')
+  if (error) throw error
+  return (data ?? []).map(s => ({
+    row: s.row,
+    col: s.col,
+    userId: s.user_id,
+    claimedAt: s.claimed_at,
+  }))
 }
 
 export async function getGames(): Promise<Game[]> {
-  return fetchJson<Game[]>('games.json')
+  const { data, error } = await supabase
+    .from('games')
+    .select('*')
+    .order('id')
+  if (error) throw error
+  return (data ?? []).map(g => ({
+    id: g.id,
+    round: g.round,
+    teamA: g.team_a,
+    teamB: g.team_b,
+    scoreA: g.score_a,
+    scoreB: g.score_b,
+  }))
 }
 
 export async function fetchAllData() {
@@ -38,95 +73,112 @@ export async function fetchAllData() {
   return { config, users, squares, games }
 }
 
-// === Writes (GitHub Contents API via Octokit) ===
-
-interface FileInfo {
-  sha: string
-  content: string
-}
-
-async function getFile(path: string): Promise<FileInfo> {
-  const { data } = await octokit.repos.getContent({
-    owner: GITHUB_OWNER,
-    repo: GITHUB_REPO,
-    path: `data/${path}`,
-    ref: GITHUB_BRANCH,
-  })
-  if (Array.isArray(data) || data.type !== 'file') {
-    throw new Error(`${path} is not a file`)
-  }
-  return {
-    sha: data.sha,
-    content: atob(data.content.replace(/\n/g, '')),
-  }
-}
-
-async function writeFile(path: string, content: string, sha: string, message: string): Promise<void> {
-  // Use TextEncoder for safe base64 encoding (handles unicode)
-  const bytes = new TextEncoder().encode(content)
-  const binStr = Array.from(bytes, b => String.fromCharCode(b)).join('')
-  const b64 = btoa(binStr)
-
-  await octokit.repos.createOrUpdateFileContents({
-    owner: GITHUB_OWNER,
-    repo: GITHUB_REPO,
-    path: `data/${path}`,
-    message,
-    content: b64,
-    sha,
-    branch: GITHUB_BRANCH,
-  })
-}
-
-/** Read-modify-write with automatic retry on SHA conflict (up to 5 attempts) */
-async function updateJsonFile<T>(
-  path: string,
-  updater: (current: T) => T,
-  message: string
-): Promise<T> {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      const file = await getFile(path)
-      const current = JSON.parse(file.content) as T
-      const updated = updater(current)
-      await writeFile(path, JSON.stringify(updated, null, 2) + '\n', file.sha, message)
-      return updated
-    } catch (err: unknown) {
-      const status = err && typeof err === 'object' && 'status' in err
-        ? (err as { status: number }).status
-        : 0
-      // 409 = conflict, 422 = SHA mismatch — both mean stale SHA, retry
-      if ((status === 409 || status === 422) && attempt < 4) {
-        console.warn(`SHA conflict on ${path}, retrying (attempt ${attempt + 1})...`)
-        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
-        continue
-      }
-      throw err
-    }
-  }
-  throw new Error('Failed after 5 attempts')
-}
-
 // === Config writes ===
 
 export async function updateConfig(updater: (c: Config) => Config): Promise<Config> {
-  return updateJsonFile<Config>('config.json', updater, 'Update board config')
+  const current = await getConfig()
+  const updated = updater(current)
+  const { error } = await supabase
+    .from('config')
+    .update({
+      board_locked: updated.boardLocked,
+      max_squares_per_person: updated.maxSquaresPerPerson,
+      row_numbers: updated.rowNumbers,
+      col_numbers: updated.colNumbers,
+    })
+    .eq('id', 1)
+  if (error) throw error
+  return updated
 }
 
 // === User writes ===
 
 export async function saveUsers(updater: (users: User[]) => User[]): Promise<User[]> {
-  return updateJsonFile<User[]>('users.json', updater, 'Update users')
+  const current = await getUsers()
+  const updated = updater(current)
+
+  // Diff: find added, removed, changed
+  const currentIds = new Set(current.map(u => u.id))
+  const updatedIds = new Set(updated.map(u => u.id))
+
+  // Deleted
+  const deletedIds = [...currentIds].filter(id => !updatedIds.has(id))
+  if (deletedIds.length > 0) {
+    const { error } = await supabase.from('users').delete().in('id', deletedIds)
+    if (error) throw error
+  }
+
+  // Upsert all remaining
+  if (updated.length > 0) {
+    const { error } = await supabase.from('users').upsert(
+      updated.map(u => ({
+        id: u.id,
+        name: u.name,
+        code: u.code,
+        admin: u.admin,
+        paid: u.paid,
+        created_at: u.createdAt,
+      }))
+    )
+    if (error) throw error
+  }
+
+  return updated
 }
 
 // === Square writes ===
 
 export async function saveSquares(updater: (squares: Square[]) => Square[]): Promise<Square[]> {
-  return updateJsonFile<Square[]>('squares.json', updater, 'Update squares')
+  const current = await getSquares()
+  const updated = updater(current)
+
+  const toKey = (s: { row: number; col: number }) => `${s.row}-${s.col}`
+  const currentKeys = new Set(current.map(toKey))
+  const updatedKeys = new Set(updated.map(toKey))
+
+  // Deleted squares
+  const deleted = current.filter(s => !updatedKeys.has(toKey(s)))
+  for (const s of deleted) {
+    const { error } = await supabase.from('squares').delete().eq('row', s.row).eq('col', s.col)
+    if (error) throw error
+  }
+
+  // Added squares
+  const added = updated.filter(s => !currentKeys.has(toKey(s)))
+  if (added.length > 0) {
+    const { error } = await supabase.from('squares').insert(
+      added.map(s => ({
+        row: s.row,
+        col: s.col,
+        user_id: s.userId,
+        claimed_at: s.claimedAt,
+      }))
+    )
+    if (error) throw error
+  }
+
+  return updated
 }
 
 // === Game writes ===
 
 export async function saveGames(updater: (games: Game[]) => Game[]): Promise<Game[]> {
-  return updateJsonFile<Game[]>('games.json', updater, 'Update games')
+  const current = await getGames()
+  const updated = updater(current)
+
+  if (updated.length > 0) {
+    const { error } = await supabase.from('games').upsert(
+      updated.map(g => ({
+        id: g.id,
+        round: g.round,
+        team_a: g.teamA,
+        team_b: g.teamB,
+        score_a: g.scoreA,
+        score_b: g.scoreB,
+      }))
+    )
+    if (error) throw error
+  }
+
+  return updated
 }

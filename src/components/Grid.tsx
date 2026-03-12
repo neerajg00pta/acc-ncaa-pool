@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -125,37 +125,57 @@ export function Grid({ searchQuery }: GridProps) {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
+  // Hover crosshair
+  const [hoverRow, setHoverRow] = useState<number | null>(null)
+  const [hoverCol, setHoverCol] = useState<number | null>(null)
+  const handleCellHover = useCallback((row: number, col: number) => {
+    setHoverRow(row)
+    setHoverCol(col)
+  }, [])
+  const clearHover = useCallback(() => {
+    setHoverRow(null)
+    setHoverCol(null)
+  }, [])
+
   return (
     <div className={styles.gridWrapper}>
-      {config.boardLocked && (
-        <div className={styles.banner + ' ' + styles.bannerLocked}>Board is locked</div>
-      )}
       {!rowNumbers && (
         <div className={styles.banner + ' ' + styles.bannerInfo}>Numbers not yet assigned</div>
       )}
 
-      <div className={styles.gridScroll}>
-        <div className={styles.grid}>
-          {/* Corner cell */}
-          <div className={styles.cornerCell}>
-            <span className={styles.cornerW}>Winner →</span>
-            <span className={styles.cornerL}>Loser ↓</span>
-          </div>
+      {/* Winner label spanning columns */}
+      <div className={styles.axisLabelRow}>
+        <div className={styles.axisLabelCorner}>
+          {config.boardLocked && <span className={styles.lockIcon} title="Board is locked">🔒</span>}
+        </div>
+        <div className={styles.axisLabelWinner}>WINNER →</div>
+      </div>
 
-          {/* Column headers (winner axis) */}
-          {Array.from({ length: 10 }, (_, ci) => (
-            <div key={`ch-${ci}`} className={`${styles.headerCell} ${styles.headerWinner}`}>
-              {colNumbers ? colNumbers[ci] : '?'}
-            </div>
-          ))}
+      <div className={styles.gridWithLoser}>
+        {/* Loser label spanning rows */}
+        <div className={styles.axisLabelLoser}>
+          <span>← LOSER</span>
+        </div>
 
-          {/* Rows */}
-          {Array.from({ length: 10 }, (_, ri) => (
-            <>
-              {/* Row header (loser axis) */}
-              <div key={`rh-${ri}`} className={`${styles.headerCell} ${styles.headerLoser}`}>
-                {rowNumbers ? rowNumbers[ri] : '?'}
+        <div className={styles.gridScroll} onMouseLeave={clearHover}>
+          <div className={styles.grid}>
+            {/* Corner cell */}
+            <div className={styles.cornerCell} />
+
+            {/* Column headers (winner axis) */}
+            {Array.from({ length: 10 }, (_, ci) => (
+              <div key={`ch-${ci}`} className={`${styles.headerCell} ${styles.headerWinner} ${hoverCol === ci ? styles.headerHighlight : ''}`}>
+                {colNumbers ? colNumbers[ci] : '?'}
               </div>
+            ))}
+
+            {/* Rows */}
+            {Array.from({ length: 10 }, (_, ri) => (
+              <>
+                {/* Row header (loser axis) */}
+                <div key={`rh-${ri}`} className={`${styles.headerCell} ${styles.headerLoser} ${hoverRow === ri ? styles.headerHighlight : ''}`}>
+                  {rowNumbers ? rowNumbers[ri] : '?'}
+                </div>
 
               {/* Square cells */}
               {Array.from({ length: 10 }, (_, ci) => {
@@ -174,6 +194,8 @@ export function Grid({ searchQuery }: GridProps) {
                 }
                 const dimmed = matchedUserIds && !matchesSearch
 
+                const isHoverCross = hoverRow === ri || hoverCol === ci
+
                 return (
                   <div
                     key={key}
@@ -185,6 +207,7 @@ export function Grid({ searchQuery }: GridProps) {
                       ${matchesSearch && matchedUserIds ? styles.cellSearchMatch : ''}
                       ${flashCell === key ? styles.cellFlash : ''}
                       ${claiming === key ? styles.cellClaiming : ''}
+                      ${isHoverCross ? styles.cellCrosshair : ''}
                     `}
                     style={
                       sq && heatLevel > 0
@@ -193,6 +216,7 @@ export function Grid({ searchQuery }: GridProps) {
                           ? { borderColor: ownerColor(sq.userId) + '60' }
                           : undefined
                     }
+                    onMouseEnter={() => handleCellHover(ri, ci)}
                     onClick={() => handleSquareClick(ri, ci)}
                     role="button"
                     tabIndex={0}
@@ -219,6 +243,7 @@ export function Grid({ searchQuery }: GridProps) {
               })}
             </>
           ))}
+          </div>
         </div>
       </div>
     </div>

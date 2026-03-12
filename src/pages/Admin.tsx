@@ -19,6 +19,12 @@ export function AdminPage() {
   const [newCode, setNewCode] = useState('')
   const [showNewRow, setShowNewRow] = useState(false)
 
+  // Inline editing state
+  const [editingCell, setEditingCell] = useState<{ userId: string; field: 'name' | 'code' } | null>(null)
+  const [editValue, setEditValue] = useState('')
+  // Delete confirmation
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
   if (!isAdmin) {
     return <div className={styles.forbidden}>Admin access required.</div>
   }
@@ -40,7 +46,10 @@ export function AdminPage() {
   }
 
   const randomizeNumbers = async () => {
-    if (!confirm('Randomize row and column numbers? This replaces any current assignment.')) return
+    if (config.boardLocked) {
+      addToast('Unlock the board first', 'error')
+      return
+    }
     setSaving(true)
     try {
       const shuffle = (arr: number[]) => {
@@ -60,6 +69,20 @@ export function AdminPage() {
       await refresh()
       addToast('Numbers randomized!', 'success')
     } catch { addToast('Failed to randomize', 'error') }
+    finally { setSaving(false) }
+  }
+
+  const clearNumbers = async () => {
+    if (config.boardLocked) {
+      addToast('Unlock the board first', 'error')
+      return
+    }
+    setSaving(true)
+    try {
+      await updateConfig(c => ({ ...c, rowNumbers: null, colNumbers: null }))
+      await refresh()
+      addToast('Numbers cleared', 'success')
+    } catch { addToast('Failed to clear', 'error') }
     finally { setSaving(false) }
   }
 
@@ -106,7 +129,6 @@ export function AdminPage() {
   }
 
   const deleteUser = async (user: User) => {
-    if (!confirm(`Delete ${user.name}?`)) return
     setSaving(true)
     try {
       await saveUsers(prev => prev.filter(u => u.id !== user.id))
@@ -138,17 +160,23 @@ export function AdminPage() {
     finally { setSaving(false) }
   }
 
-  const editUser = async (user: User, field: 'name' | 'code') => {
-    const current = field === 'name' ? user.name : user.code
-    const newVal = prompt(`New ${field}:`, current)
-    if (!newVal || newVal === current) return
+  const startEdit = (userId: string, field: 'name' | 'code', currentValue: string) => {
+    setEditingCell({ userId, field })
+    setEditValue(currentValue)
+  }
+
+  const commitEdit = async () => {
+    if (!editingCell) return
+    const { userId, field } = editingCell
+    const val = editValue.trim()
+    if (!val) { setEditingCell(null); return }
     setSaving(true)
     try {
       await saveUsers(prev =>
-        prev.map(u => u.id === user.id ? { ...u, [field]: newVal } : u)
+        prev.map(u => u.id === userId ? { ...u, [field]: val } : u)
       )
       await refresh()
-      addToast('Updated', 'success')
+      setEditingCell(null)
     } catch { addToast('Failed to update', 'error') }
     finally { setSaving(false) }
   }
@@ -179,10 +207,20 @@ export function AdminPage() {
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={randomizeNumbers}
-            disabled={saving}
+            disabled={saving || config.boardLocked}
           >
             🎲 Randomize Numbers
           </button>
+
+          {config.rowNumbers && (
+            <button
+              className={styles.btn}
+              onClick={clearNumbers}
+              disabled={saving || config.boardLocked}
+            >
+              ✕ Clear Numbers
+            </button>
+          )}
 
           <div className={styles.inlineControl}>
             <label className={styles.label}>Max squares per person:</label>
@@ -288,14 +326,36 @@ export function AdminPage() {
               {users.map(user => (
                 <tr key={user.id}>
                   <td>
-                    <button className={styles.cellBtn} onClick={() => editUser(user, 'name')}>
-                      {user.name}
-                    </button>
+                    {editingCell?.userId === user.id && editingCell.field === 'name' ? (
+                      <input
+                        className={styles.inlineInput}
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingCell(null) }}
+                        onBlur={commitEdit}
+                        autoFocus
+                      />
+                    ) : (
+                      <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'name', user.name)}>
+                        {user.name}
+                      </button>
+                    )}
                   </td>
                   <td>
-                    <button className={styles.cellBtn} onClick={() => editUser(user, 'code')}>
-                      <code className={styles.code}>{user.code}</code>
-                    </button>
+                    {editingCell?.userId === user.id && editingCell.field === 'code' ? (
+                      <input
+                        className={styles.inlineInput}
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingCell(null) }}
+                        onBlur={commitEdit}
+                        autoFocus
+                      />
+                    ) : (
+                      <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'code', user.code)}>
+                        <code className={styles.code}>{user.code}</code>
+                      </button>
+                    )}
                   </td>
                   <td>
                     <button className={styles.copyLinkBtn} onClick={() => copyLink(user.code)}>
@@ -321,13 +381,20 @@ export function AdminPage() {
                     </button>
                   </td>
                   <td>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() => deleteUser(user)}
-                      disabled={saving}
-                    >
-                      ✕
-                    </button>
+                    {confirmDeleteId === user.id ? (
+                      <div className={styles.newRowActions}>
+                        <button className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`} onClick={() => { deleteUser(user); setConfirmDeleteId(null) }}>Delete</button>
+                        <button className={`${styles.btn} ${styles.btnSm}`} onClick={() => setConfirmDeleteId(null)}>No</button>
+                      </div>
+                    ) : (
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => setConfirmDeleteId(user.id)}
+                        disabled={saving}
+                      >
+                        ✕
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

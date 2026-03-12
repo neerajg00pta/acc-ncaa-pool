@@ -87,12 +87,12 @@ export function Leaderboard() {
       )}
 
       <div className={styles.list}>
-        {entries.map((entry, i) => (
+        {entries.map((entry, i) => entry.userId === currentUser?.id ? null : (
           <LeaderboardRow
             key={entry.userId}
             entry={entry}
             rank={i + 1}
-            isMine={entry.userId === currentUser?.id}
+            isMine={false}
             config={config}
           />
         ))}

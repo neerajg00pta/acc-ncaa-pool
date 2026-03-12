@@ -62,12 +62,17 @@ async function getFile(path: string): Promise<FileInfo> {
 }
 
 async function writeFile(path: string, content: string, sha: string, message: string): Promise<void> {
+  // Use TextEncoder for safe base64 encoding (handles unicode)
+  const bytes = new TextEncoder().encode(content)
+  const binStr = Array.from(bytes, b => String.fromCharCode(b)).join('')
+  const b64 = btoa(binStr)
+
   await octokit.repos.createOrUpdateFileContents({
     owner: GITHUB_OWNER,
     repo: GITHUB_REPO,
     path: `data/${path}`,
     message,
-    content: btoa(content),
+    content: b64,
     sha,
     branch: GITHUB_BRANCH,
   })

@@ -47,7 +47,7 @@ export function Layout({ children }: { children: ReactNode }) {
                     to="/admin"
                     className={`${styles.navLink} ${location.pathname === '/admin' ? styles.navLinkActive : ''}`}
                   >
-                    Board
+                    Admin
                   </Link>
                   <Link
                     to="/admin/games"

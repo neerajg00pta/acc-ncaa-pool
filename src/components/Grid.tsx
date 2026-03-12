@@ -108,7 +108,8 @@ export function Grid({ searchQuery }: GridProps) {
         addToast('Claimed!', 'success')
       }
       await refresh()
-    } catch {
+    } catch (err) {
+      console.error('Square claim error:', err)
       addToast('Failed — try again', 'error')
     } finally {
       setClaiming(null)

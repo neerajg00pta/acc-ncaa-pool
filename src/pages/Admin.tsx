@@ -29,11 +29,12 @@ export function AdminPage() {
   // === Board Controls ===
 
   const toggleLock = async () => {
+    const willLock = !config.boardLocked
     setSaving(true)
     try {
-      await updateConfig(c => ({ ...c, boardLocked: !c.boardLocked }))
+      await updateConfig(c => ({ ...c, boardLocked: willLock }))
       await refresh()
-      addToast(config.boardLocked ? 'Board unlocked' : 'Board locked', 'success')
+      addToast(willLock ? 'Board locked' : 'Board unlocked', 'success')
     } catch { addToast('Failed to update', 'error') }
     finally { setSaving(false) }
   }

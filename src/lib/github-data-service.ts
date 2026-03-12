@@ -78,13 +78,13 @@ async function writeFile(path: string, content: string, sha: string, message: st
   })
 }
 
-/** Read-modify-write with automatic retry on SHA conflict (up to 3 attempts) */
+/** Read-modify-write with automatic retry on SHA conflict (up to 5 attempts) */
 async function updateJsonFile<T>(
   path: string,
   updater: (current: T) => T,
   message: string
 ): Promise<T> {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const file = await getFile(path)
       const current = JSON.parse(file.content) as T
@@ -92,15 +92,19 @@ async function updateJsonFile<T>(
       await writeFile(path, JSON.stringify(updated, null, 2) + '\n', file.sha, message)
       return updated
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 409 && attempt < 2) {
-        // SHA conflict — retry
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+      const status = err && typeof err === 'object' && 'status' in err
+        ? (err as { status: number }).status
+        : 0
+      // 409 = conflict, 422 = SHA mismatch — both mean stale SHA, retry
+      if ((status === 409 || status === 422) && attempt < 4) {
+        console.warn(`SHA conflict on ${path}, retrying (attempt ${attempt + 1})...`)
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
         continue
       }
       throw err
     }
   }
-  throw new Error('Failed after 3 attempts')
+  throw new Error('Failed after 5 attempts')
 }
 
 // === Config writes ===

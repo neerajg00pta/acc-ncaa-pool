@@ -119,8 +119,12 @@
   background: rgba(88, 166, 255, 0.08);
 }
 
-.headerHighlight {
-  background: rgba(240, 165, 0, 0.2) !important;
+.headerHighlight.headerWinner {
+  background: rgba(240, 165, 0, 0.25) !important;
+}
+
+.headerHighlight.headerLoser {
+  background: rgba(88, 166, 255, 0.25) !important;
 }
 
 .cell {
@@ -182,8 +186,16 @@
   pointer-events: none;
 }
 
-.cellCrosshair {
+.cellCrosshairRow {
+  background: rgba(88, 166, 255, 0.06);
+}
+
+.cellCrosshairCol {
   background: rgba(240, 165, 0, 0.06);
+}
+
+.cellCrosshairBoth {
+  background: rgba(240, 165, 0, 0.12);
 }
 
 .ownerName {

@@ -123,7 +123,7 @@ export function Grid({ searchQuery }: GridProps) {
     return new Set(users.filter(u => u.name.toLowerCase().includes(searchLower)).map(u => u.id))
   }, [searchLower, users])
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  // Search: always dim (same behavior on mobile and desktop)
 
   // Hover crosshair
   const [hoverRow, setHoverRow] = useState<number | null>(null)
@@ -187,14 +187,17 @@ export function Grid({ searchQuery }: GridProps) {
                 const totalPayout = payoutMap.map.get(key) || 0
                 const heatLevel = payoutMap.maxPayout > 0 ? totalPayout / payoutMap.maxPayout : 0
 
-                // Search visibility
+                // Search visibility (dim non-matches on all devices)
                 const matchesSearch = !matchedUserIds || (sq && matchedUserIds.has(sq.userId))
-                if (isMobile && matchedUserIds && !matchesSearch) {
-                  return <div key={key} className={styles.cellHidden} />
-                }
                 const dimmed = matchedUserIds && !matchesSearch
 
-                const isHoverCross = hoverRow === ri || hoverCol === ci
+                const onHoverRow = hoverRow === ri
+                const onHoverCol = hoverCol === ci
+                const crossClass = onHoverRow && onHoverCol
+                  ? styles.cellCrosshairBoth
+                  : onHoverRow ? styles.cellCrosshairRow
+                  : onHoverCol ? styles.cellCrosshairCol
+                  : ''
 
                 return (
                   <div
@@ -207,7 +210,7 @@ export function Grid({ searchQuery }: GridProps) {
                       ${matchesSearch && matchedUserIds ? styles.cellSearchMatch : ''}
                       ${flashCell === key ? styles.cellFlash : ''}
                       ${claiming === key ? styles.cellClaiming : ''}
-                      ${isHoverCross ? styles.cellCrosshair : ''}
+                      ${crossClass}
                     `}
                     style={
                       sq && heatLevel > 0

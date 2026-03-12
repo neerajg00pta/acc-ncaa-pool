@@ -138,13 +138,13 @@ export function Grid({ searchQuery }: GridProps) {
         <div className={styles.grid}>
           {/* Corner cell */}
           <div className={styles.cornerCell}>
-            <span className={styles.cornerW}>W→</span>
-            <span className={styles.cornerL}>L↓</span>
+            <span className={styles.cornerW}>Winner →</span>
+            <span className={styles.cornerL}>Loser ↓</span>
           </div>
 
-          {/* Column headers */}
+          {/* Column headers (winner axis) */}
           {Array.from({ length: 10 }, (_, ci) => (
-            <div key={`ch-${ci}`} className={styles.headerCell}>
+            <div key={`ch-${ci}`} className={`${styles.headerCell} ${styles.headerWinner}`}>
               {colNumbers ? colNumbers[ci] : '?'}
             </div>
           ))}
@@ -152,8 +152,8 @@ export function Grid({ searchQuery }: GridProps) {
           {/* Rows */}
           {Array.from({ length: 10 }, (_, ri) => (
             <>
-              {/* Row header */}
-              <div key={`rh-${ri}`} className={styles.headerCell}>
+              {/* Row header (loser axis) */}
+              <div key={`rh-${ri}`} className={`${styles.headerCell} ${styles.headerLoser}`}>
                 {rowNumbers ? rowNumbers[ri] : '?'}
               </div>
 

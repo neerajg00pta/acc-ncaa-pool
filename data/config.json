@@ -1,6 +1,28 @@
 {
   "boardLocked": false,
   "maxSquaresPerPerson": 10,
-  "rowNumbers": null,
-  "colNumbers": null
+  "rowNumbers": [
+    6,
+    7,
+    4,
+    8,
+    3,
+    9,
+    2,
+    1,
+    0,
+    5
+  ],
+  "colNumbers": [
+    0,
+    4,
+    6,
+    1,
+    8,
+    2,
+    7,
+    9,
+    5,
+    3
+  ]
 }

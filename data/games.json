@@ -1,1 +1,506 @@
-[]
+[
+  {
+    "id": 1,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 2,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 3,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 4,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 5,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 6,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 7,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 8,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 9,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 10,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 11,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 12,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 13,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 14,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 15,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 16,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 17,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 18,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 19,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 20,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 21,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 22,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 23,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 24,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 25,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 26,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 27,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 28,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 29,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 30,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 31,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 32,
+    "round": "R64",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 33,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 34,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 35,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 36,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 37,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 38,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 39,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 40,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 41,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 42,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 43,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 44,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 45,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 46,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 47,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 48,
+    "round": "R32",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 49,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 50,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 51,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 52,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 53,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 54,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 55,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 56,
+    "round": "S16",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 57,
+    "round": "E8",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 58,
+    "round": "E8",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 59,
+    "round": "E8",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 60,
+    "round": "E8",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 61,
+    "round": "F4",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 62,
+    "round": "F4",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  },
+  {
+    "id": 63,
+    "round": "CHAMP",
+    "teamA": "",
+    "teamB": "",
+    "scoreA": null,
+    "scoreB": null
+  }
+]

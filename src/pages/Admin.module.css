@@ -232,3 +232,51 @@
   color: var(--accent-red);
   background: rgba(248, 81, 73, 0.1);
 }
+
+/* Inline new row */
+.newRow td {
+  background: rgba(240, 165, 0, 0.05);
+}
+
+.inlineInput {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--accent-gold);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.inlineInput::placeholder { color: var(--text-muted); }
+
+.linkPreview {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.linkText {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.newRowActions {
+  display: flex;
+  gap: 4px;
+}
+
+.copyLinkBtn {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.copyLinkBtn:hover {
+  background: rgba(88, 166, 255, 0.1);
+}

@@ -6,11 +6,18 @@ import { saveUsers, updateConfig } from '../lib/github-data-service'
 import type { User } from '../lib/types'
 import styles from './Admin.module.css'
 
+const BASE_URL = `${window.location.origin}${window.location.pathname}`
+
 export function AdminPage() {
   const { isAdmin } = useAuth()
   const { config, users, refresh } = useData()
   const { addToast } = useToast()
   const [saving, setSaving] = useState(false)
+
+  // New player inline row state
+  const [newName, setNewName] = useState('')
+  const [newCode, setNewCode] = useState('')
+  const [showNewRow, setShowNewRow] = useState(false)
 
   if (!isAdmin) {
     return <div className={styles.forbidden}>Admin access required.</div>
@@ -68,11 +75,12 @@ export function AdminPage() {
   // === User Management ===
 
   const addUser = async () => {
-    const name = prompt('Player name:')
-    if (!name) return
-    const code = prompt('Access code:')
-    if (!code) return
-    const isAdminUser = confirm('Grant admin privileges?')
+    const name = newName.trim()
+    const code = newCode.trim()
+    if (!name || !code) {
+      addToast('Name and code are required', 'error')
+      return
+    }
 
     setSaving(true)
     try {
@@ -82,12 +90,15 @@ export function AdminPage() {
           id: `u${Date.now()}`,
           name,
           code,
-          admin: isAdminUser,
+          admin: false,
           paid: false,
           createdAt: new Date().toISOString(),
         },
       ])
       await refresh()
+      setNewName('')
+      setNewCode('')
+      setShowNewRow(false)
       addToast(`Added ${name}`, 'success')
     } catch { addToast('Failed to add user', 'error') }
     finally { setSaving(false) }
@@ -139,6 +150,13 @@ export function AdminPage() {
       addToast('Updated', 'success')
     } catch { addToast('Failed to update', 'error') }
     finally { setSaving(false) }
+  }
+
+  const inviteLink = (code: string) => `${BASE_URL}#/?token=${code}`
+
+  const copyLink = (code: string) => {
+    navigator.clipboard.writeText(inviteLink(code))
+    addToast('Link copied!', 'success')
   }
 
   return (
@@ -199,7 +217,11 @@ export function AdminPage() {
           <span className={styles.paidSummary}>
             {paidCount}/{users.length} paid · ${totalCollected.toLocaleString()} collected
           </span>
-          <button className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} onClick={addUser} disabled={saving}>
+          <button
+            className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+            onClick={() => setShowNewRow(true)}
+            disabled={saving || showNewRow}
+          >
             + Add Player
           </button>
         </div>
@@ -210,12 +232,58 @@ export function AdminPage() {
               <tr>
                 <th>Name</th>
                 <th>Code</th>
+                <th>Invite Link</th>
                 <th>Admin</th>
                 <th>Paid</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
+              {showNewRow && (
+                <tr className={styles.newRow}>
+                  <td>
+                    <input
+                      className={styles.inlineInput}
+                      value={newName}
+                      onChange={e => setNewName(e.target.value)}
+                      placeholder="Player name"
+                      autoFocus
+                      onKeyDown={e => e.key === 'Enter' && addUser()}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className={styles.inlineInput}
+                      value={newCode}
+                      onChange={e => setNewCode(e.target.value)}
+                      placeholder="Access code"
+                      onKeyDown={e => e.key === 'Enter' && addUser()}
+                    />
+                  </td>
+                  <td className={styles.linkPreview}>
+                    {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <div className={styles.newRowActions}>
+                      <button
+                        className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+                        onClick={addUser}
+                        disabled={saving || !newName.trim() || !newCode.trim()}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className={`${styles.btn} ${styles.btnSm}`}
+                        onClick={() => { setShowNewRow(false); setNewName(''); setNewCode('') }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
               {users.map(user => (
                 <tr key={user.id}>
                   <td>
@@ -226,6 +294,11 @@ export function AdminPage() {
                   <td>
                     <button className={styles.cellBtn} onClick={() => editUser(user, 'code')}>
                       <code className={styles.code}>{user.code}</code>
+                    </button>
+                  </td>
+                  <td>
+                    <button className={styles.copyLinkBtn} onClick={() => copyLink(user.code)}>
+                      Copy link
                     </button>
                   </td>
                   <td>

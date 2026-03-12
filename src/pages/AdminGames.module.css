@@ -1,0 +1,227 @@
+.forbidden {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--accent-red);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.emptyState h1 {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.emptyState p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.initBtn {
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  background: var(--accent-gold);
+  color: #000;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.initBtn:hover { opacity: 0.85; }
+.initBtn:disabled { opacity: 0.5; }
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statFinal { color: var(--text-secondary); }
+.statActive { color: var(--accent-green); }
+.statScheduled { color: var(--text-muted); }
+
+.savingBadge {
+  font-size: 11px;
+  color: var(--accent-gold);
+  font-weight: 600;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.5; }
+}
+
+.roundSection {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.roundHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.roundTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.roundPayout {
+  font-size: 12px;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.roundCount {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 6px 8px;
+  letter-spacing: 0.3px;
+}
+
+.thNum { width: 36px; }
+.thScore { width: 64px; }
+.thStatus { width: 72px; }
+
+.table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.row:hover td {
+  background: var(--bg-elevated);
+}
+
+.row_final { opacity: 0.7; }
+.row_active td { background: rgba(46, 160, 67, 0.05); }
+
+.gameNum {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.teamInput {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.teamInput:focus {
+  border-color: var(--accent-gold);
+  background: var(--bg-input);
+}
+
+.teamInput::placeholder { color: var(--text-muted); }
+
+.scoreInput {
+  width: 56px;
+  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  -moz-appearance: textfield;
+}
+
+.scoreInput::-webkit-outer-spin-button,
+.scoreInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.scoreInput:focus {
+  border-color: var(--accent-gold);
+  background: var(--bg-input);
+}
+
+.scoreInput::placeholder { color: var(--text-muted); }
+
+.statusBadge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+
+.status_scheduled {
+  color: var(--text-muted);
+  background: var(--bg-primary);
+}
+
+.status_active {
+  color: var(--accent-green);
+  background: rgba(46, 160, 67, 0.15);
+}
+
+.status_final {
+  color: var(--text-secondary);
+  background: rgba(139, 148, 158, 0.1);
+}

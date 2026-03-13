@@ -16,12 +16,13 @@ export function AdminPage() {
   const [saving, setSaving] = useState(false)
 
   // New player inline row state
+  const [newFullName, setNewFullName] = useState('')
   const [newName, setNewName] = useState('')
-  const [newEmail, setNewCode] = useState('')
+  const [newEmail, setNewEmail] = useState('')
   const [showNewRow, setShowNewRow] = useState(false)
 
   // Inline editing state
-  const [editingCell, setEditingCell] = useState<{ userId: string; field: 'name' | 'email' } | null>(null)
+  const [editingCell, setEditingCell] = useState<{ userId: string; field: 'name' | 'email' | 'fullName' } | null>(null)
   const [editValue, setEditValue] = useState('')
   // Delete confirmation
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -117,10 +118,11 @@ export function AdminPage() {
   // === User Management ===
 
   const addUser = async () => {
-    const name = newName.trim()
+    const fullName = newFullName.trim()
+    const name = newName.trim().slice(0, 8)
     const email = newEmail.trim().toLowerCase()
     if (!name || !email) {
-      addToast('Name and email are required', 'error')
+      addToast('Display name and email are required', 'error')
       return
     }
 
@@ -132,14 +134,16 @@ export function AdminPage() {
           id: `u${Date.now()}`,
           name,
           email,
+          fullName: fullName || undefined,
           admin: false,
           paid: false,
           createdAt: new Date().toISOString(),
         },
       ])
       await refresh()
+      setNewFullName('')
       setNewName('')
-      setNewCode('')
+      setNewEmail('')
       setShowNewRow(false)
       addToast(`Added ${name}`, 'success')
     } catch { addToast('Failed to add user', 'error') }
@@ -178,7 +182,7 @@ export function AdminPage() {
     finally { setSaving(false) }
   }
 
-  const startEdit = (userId: string, field: 'name' | 'email', currentValue: string) => {
+  const startEdit = (userId: string, field: 'name' | 'email' | 'fullName', currentValue: string) => {
     setEditingCell({ userId, field })
     setEditValue(currentValue)
   }
@@ -303,7 +307,8 @@ export function AdminPage() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Full Name</th>
+                <th>Display</th>
                 <th>Email</th>
                 <th>Invite</th>
                 <th>Sq</th>
@@ -316,6 +321,22 @@ export function AdminPage() {
             <tbody>
               {users.map(user => (
                 <tr key={user.id}>
+                  <td>
+                    {editingCell?.userId === user.id && editingCell.field === 'fullName' ? (
+                      <input
+                        className={styles.inlineInput}
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingCell(null) }}
+                        onBlur={commitEdit}
+                        autoFocus
+                      />
+                    ) : (
+                      <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'fullName', user.fullName || '')}>
+                        {user.fullName || '—'}
+                      </button>
+                    )}
+                  </td>
                   <td>
                     {editingCell?.userId === user.id && editingCell.field === 'name' ? (
                       <input
@@ -400,27 +421,34 @@ export function AdminPage() {
                   <td>
                     <input
                       className={styles.inlineInput}
-                      value={newName}
-                      onChange={e => setNewName(e.target.value)}
-                      placeholder="Player name"
+                      value={newFullName}
+                      onChange={e => setNewFullName(e.target.value)}
+                      placeholder="Full name"
                       autoFocus
-                      onBlur={() => { if (newName.trim() && newEmail.trim()) addUser(); else if (!newName.trim() && !newEmail.trim()) { setShowNewRow(false) } }}
-                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim()) { const next = e.currentTarget.parentElement?.nextElementSibling?.querySelector('input') as HTMLInputElement; next?.focus() } if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
+                      onKeyDown={e => { if (e.key === 'Enter') { const next = e.currentTarget.parentElement?.nextElementSibling?.querySelector('input') as HTMLInputElement; next?.focus() } if (e.key === 'Escape') { setShowNewRow(false); setNewFullName(''); setNewName(''); setNewEmail('') } }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className={styles.inlineInput}
+                      value={newName}
+                      onChange={e => setNewName(e.target.value.slice(0, 8))}
+                      placeholder="Max 8 chars"
+                      maxLength={8}
+                      onKeyDown={e => { if (e.key === 'Enter') { const next = e.currentTarget.parentElement?.nextElementSibling?.querySelector('input') as HTMLInputElement; next?.focus() } if (e.key === 'Escape') { setShowNewRow(false); setNewFullName(''); setNewName(''); setNewEmail('') } }}
                     />
                   </td>
                   <td>
                     <input
                       className={styles.inlineInput}
                       value={newEmail}
-                      onChange={e => setNewCode(e.target.value)}
-                      placeholder="Email address"
-                      onBlur={() => { if (newName.trim() && newEmail.trim()) addUser() }}
-                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim() && newEmail.trim()) addUser(); if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
+                      onChange={e => setNewEmail(e.target.value)}
+                      placeholder="Email"
+                      onBlur={() => { if (newName.trim() && newEmail.trim()) addUser(); else if (!newFullName.trim() && !newName.trim() && !newEmail.trim()) setShowNewRow(false) }}
+                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim() && newEmail.trim()) addUser(); if (e.key === 'Escape') { setShowNewRow(false); setNewFullName(''); setNewName(''); setNewEmail('') } }}
                     />
                   </td>
-                  <td className={styles.linkPreview}>
-                    {newEmail ? <span className={styles.linkText}>...?token={newEmail.trim()}</span> : '—'}
-                  </td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>

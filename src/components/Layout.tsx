@@ -20,17 +20,11 @@ export function Layout({ children }: { children: ReactNode }) {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       keyBuffer.current += e.key.toLowerCase()
-      keyBuffer.current = keyBuffer.current.slice(-6)
-      if (keyBuffer.current.endsWith('admin')) {
+      keyBuffer.current = keyBuffer.current.slice(-5)
+      if (keyBuffer.current === 'admin') {
         keyBuffer.current = ''
         if (activateAdmin()) {
           addToast('Admin mode activated', 'success')
-        }
-      } else if (keyBuffer.current.endsWith('player')) {
-        keyBuffer.current = ''
-        if (isAdmin) {
-          deactivateAdmin()
-          addToast('Player mode', 'success')
         }
       }
     }
@@ -91,6 +85,12 @@ export function Layout({ children }: { children: ReactNode }) {
                   >
                     Games
                   </Link>
+                  <button
+                    className={styles.exitAdminBtn}
+                    onClick={() => { deactivateAdmin(); addToast('Player mode', 'success') }}
+                  >
+                    Exit Admin
+                  </button>
                 </nav>
               )}
               <button onClick={logout} className={styles.logoutBtn}>

@@ -104,7 +104,6 @@
 }
 
 .payoutAmount {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-weight: 700;
   color: var(--accent-blue);
   font-variant-numeric: tabular-nums;

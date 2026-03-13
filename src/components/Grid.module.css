@@ -179,6 +179,7 @@
 }
 
 .cellMine {
+  border-color: rgba(240, 165, 0, 0.35) !important;
 }
 
 .cellDimmed {

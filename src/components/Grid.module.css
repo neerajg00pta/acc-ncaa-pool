@@ -181,8 +181,6 @@
 }
 
 .cellMine {
-  background: rgba(240, 165, 0, 0.06);
-  border-color: rgba(240, 165, 0, 0.25) !important;
 }
 
 .cellDimmed {
@@ -295,104 +293,20 @@
   z-index: 151;
 }
 
-@keyframes popIn {
-  from { transform: translateX(-50%) translateY(-4px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
-}
-
-.detailHeader {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.detailCoord {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.detailOwner {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
-
-.detailUnclaimed {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.detailTotal {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--accent-blue);
-  background: var(--bg-primary);
-  padding: 1px 6px;
-  border-radius: 3px;
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-
-.detailClose {
+.popoverClose {
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 14px;
   padding: 4px;
+  margin-left: 4px;
 }
 
-.detailClose:hover { color: var(--text-primary); }
+.popoverClose:hover { color: var(--text-primary); }
 
-.detailGames {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+@keyframes popIn {
+  from { transform: translateX(-50%) translateY(-4px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 
-.detailGame {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  padding: 4px 0;
-  border-top: 1px solid var(--border-muted);
-}
-
-.detailRound {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  min-width: 80px;
-}
-
-.detailMatchup {
-  flex: 1;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.detailWinTeam {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.detailPayout {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  font-weight: 700;
-  color: var(--accent-blue);
-  font-variant-numeric: tabular-nums;
-}
-
-.detailEmpty {
-  font-size: 12px;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 8px 0;
-}

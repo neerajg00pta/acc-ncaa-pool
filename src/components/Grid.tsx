@@ -6,10 +6,11 @@ import { saveSquares, updateConfig } from '../lib/github-data-service'
 import {
   type Game, type Square,
   getGameStatus, gameToSquare,
-  ROUND_PAYOUTS, ROUND_LABELS, getGameWinner,
+  ROUND_PAYOUTS, ROUND_LABELS,
 } from '../lib/types'
 import { RegisterModal } from './RegisterModal'
 import styles from './Grid.module.css'
+import lbStyles from './Leaderboard.module.css'
 
 interface GridProps {
   searchQuery: string
@@ -349,40 +350,30 @@ export function Grid({ searchQuery }: GridProps) {
             style={{ left: popoverPos.x, top: popoverPos.y }}
             onClick={e => e.stopPropagation()}
           >
-            <div className={styles.detailHeader}>
-              <span className={styles.detailCoord}>
-                [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
-              </span>
-              {selectedData.ownerName ? (
-                <span className={styles.detailOwner}>{selectedData.ownerName}</span>
-              ) : (
-                <span className={styles.detailUnclaimed}>Unclaimed</span>
-              )}
-              {selectedData.total > 0 && (
-                <span className={styles.detailTotal}>${selectedData.total.toLocaleString()}</span>
-              )}
-              <button className={styles.detailClose} onClick={() => { setSelectedSquare(null); setPopoverPos(null) }}>✕</button>
-            </div>
-            {selectedData.entries.length > 0 ? (
-              <div className={styles.detailGames}>
-                {selectedData.entries.map(({ game, payout }) => {
-                  const winner = getGameWinner(game)
-                  return (
-                    <div key={game.id} className={styles.detailGame}>
-                      <span className={styles.detailRound}>{ROUND_LABELS[game.round]}</span>
-                      <span className={styles.detailMatchup}>
-                        <span className={winner === 'A' ? styles.detailWinTeam : ''}>{game.teamA}</span>
-                        {' '}{game.scoreA}-{game.scoreB}{' '}
-                        <span className={winner === 'B' ? styles.detailWinTeam : ''}>{game.teamB}</span>
-                      </span>
-                      {payout > 0 && <span className={styles.detailPayout}>${payout}</span>}
-                    </div>
-                  )
-                })}
+            <div className={lbStyles.row}>
+              <div className={lbStyles.rowHeader}>
+                <span className={lbStyles.rank}>#{selectedData.row * 10 + selectedData.col + 1}</span>
+                <span className={lbStyles.name}>{selectedData.ownerName || 'Unclaimed'}</span>
+                <span className={lbStyles.winnings}>${selectedData.total.toLocaleString()}</span>
+                <button className={styles.popoverClose} onClick={() => { setSelectedSquare(null); setPopoverPos(null) }}>✕</button>
               </div>
-            ) : (
-              <div className={styles.detailEmpty}>No games on this square yet</div>
-            )}
+              <div className={lbStyles.breakdown}>
+                {selectedData.entries.length > 0 ? selectedData.entries.map(({ game, payout }) => (
+                  <div key={game.id} className={lbStyles.payoutRow}>
+                    <span className={lbStyles.payoutSquare}>
+                      [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
+                    </span>
+                    <span className={lbStyles.payoutGame}>
+                      {game.teamA} {game.scoreA}-{game.scoreB} {game.teamB}
+                    </span>
+                    <span className={lbStyles.payoutRound}>{ROUND_LABELS[game.round]}</span>
+                    {payout > 0 && <span className={lbStyles.payoutAmount}>${payout}</span>}
+                  </div>
+                )) : (
+                  <div className={lbStyles.noWins}>No games on this square yet</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

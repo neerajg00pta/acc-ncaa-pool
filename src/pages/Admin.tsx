@@ -256,7 +256,7 @@ export function AdminPage() {
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={randomizeNumbers}
-            disabled={saving || config.boardLocked}
+            disabled={saving || config.boardLocked || !!config.rowNumbers}
           >
             🎲 Randomize Numbers
           </button>
@@ -285,17 +285,15 @@ export function AdminPage() {
           </div>
         </div>
 
-        {config.rowNumbers && (
-          <div className={styles.numberDisplay}>
-            <span className={styles.numberLabel}>Rows:</span>
-            <span className={styles.numbers}>{config.rowNumbers.join(' ')}</span>
-            <span className={styles.numberLabel}>Cols:</span>
-            <span className={styles.numbers}>{config.colNumbers?.join(' ')}</span>
-            <button className={styles.csvSmBtn} onClick={downloadSquaresCsv}>
-              Download Squares CSV
-            </button>
-          </div>
-        )}
+        <div className={styles.numberDisplay}>
+          <span className={styles.numberLabelW}>Cols (W):</span>
+          <span className={styles.numbersW}>{config.colNumbers ? config.colNumbers.join(' ') : '— not assigned —'}</span>
+          <span className={styles.numberLabelL}>Rows (L):</span>
+          <span className={styles.numbersL}>{config.rowNumbers ? config.rowNumbers.join(' ') : '— not assigned —'}</span>
+          <button className={styles.csvSmBtn} onClick={downloadSquaresCsv}>
+            Download Squares CSV
+          </button>
+        </div>
       </section>
 
       {/* User Management */}

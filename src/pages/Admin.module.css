@@ -132,7 +132,43 @@
   border-radius: var(--radius);
 }
 
-.numberLabel { font-weight: 600; }
+.numberLabelW {
+  font-weight: 700;
+  color: var(--accent-gold);
+  font-size: 12px;
+}
+
+.numberLabelL {
+  font-weight: 700;
+  color: var(--accent-blue);
+  font-size: 12px;
+}
+
+.numbersW {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+}
+
+.numbersL {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: 2px;
+}
+
+.confirmGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.confirmText {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
 
 .csvSmBtn {
   margin-left: auto;
@@ -152,12 +188,6 @@
   color: var(--accent-gold);
 }
 
-.numbers {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 2px;
-}
 
 /* Table */
 .tableWrap {

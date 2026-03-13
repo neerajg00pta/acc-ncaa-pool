@@ -56,7 +56,8 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
       refresh()
       addToast(`Welcome, ${trimDisplay}!`, 'success')
       onRegistered()
-    } catch {
+    } catch (err) {
+      console.error('Registration error:', err)
       setError('Something went wrong — try again')
     } finally {
       setSaving(false)

@@ -146,11 +146,7 @@ export function Grid({ searchQuery }: GridProps) {
 
   const handleRegistered = () => {
     setShowRegister(false)
-    // Claim the pending square after registration
-    if (pendingClaim) {
-      setTimeout(() => handleSquareClick(pendingClaim.row, pendingClaim.col), 300)
-      setPendingClaim(null)
-    }
+    setPendingClaim(null)
   }
 
   const toggleLock = async () => {

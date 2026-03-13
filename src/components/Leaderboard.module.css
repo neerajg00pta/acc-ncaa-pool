@@ -74,10 +74,14 @@
 }
 
 .winnings {
-  font-size: 14px;
-  font-weight: 800;
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--accent-blue);
+  background: var(--bg-primary);
+  padding: 1px 6px;
+  border-radius: 3px;
 }
 
 .chevron {
@@ -124,6 +128,7 @@
 }
 
 .payoutAmount {
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-weight: 700;
   color: var(--accent-blue);
   font-variant-numeric: tabular-nums;

@@ -262,10 +262,6 @@ export function Grid({ searchQuery }: GridProps) {
 
   return (
     <div className={styles.gridWrapper}>
-      {!rowNumbers && (
-        <div className={styles.banner + ' ' + styles.bannerInfo}>Numbers not yet assigned</div>
-      )}
-
       {/* Winner label + admin lock toggle */}
       <div className={styles.axisLabelRow}>
         <div className={styles.axisLabelCorner}>

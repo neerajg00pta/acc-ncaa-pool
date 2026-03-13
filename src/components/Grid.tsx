@@ -22,6 +22,7 @@ export function Grid({ searchQuery }: GridProps) {
   const [claiming, setClaiming] = useState<string | null>(null)
   const [flashCell, setFlashCell] = useState<string | null>(null)
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
+  const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const [showRegister, setShowRegister] = useState(false)
   const [pendingClaim, setPendingClaim] = useState<{ row: number; col: number } | null>(null)
   const [editingHeader, setEditingHeader] = useState<{ axis: 'row' | 'col'; index: number } | null>(null)
@@ -78,13 +79,22 @@ export function Grid({ searchQuery }: GridProps) {
     return squares.filter(s => s.userId === currentUser.id).length
   }, [squares, currentUser])
 
-  const handleSquareClick = async (row: number, col: number) => {
+  const handleSquareClick = async (row: number, col: number, e?: React.MouseEvent) => {
     const key = `${row}-${col}`
     const existing = squareMap.get(key)
 
-    // When board is locked, show detail card instead
+    // When board is locked, show detail popover at click point
     if (config.boardLocked) {
-      setSelectedSquare(selectedSquare === key ? null : key)
+      if (selectedSquare === key) {
+        setSelectedSquare(null)
+        setPopoverPos(null)
+      } else {
+        setSelectedSquare(key)
+        if (e) {
+          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+          setPopoverPos({ x: rect.left + rect.width / 2, y: rect.bottom + 8 })
+        }
+      }
       return
     }
 
@@ -169,6 +179,15 @@ export function Grid({ searchQuery }: GridProps) {
     } catch { addToast('Failed to update', 'error') }
     setEditingHeader(null)
   }
+
+  // Esc to close popover
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSelectedSquare(null); setPopoverPos(null) }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   // Search
   const searchLower = searchQuery.toLowerCase()
@@ -306,7 +325,7 @@ export function Grid({ searchQuery }: GridProps) {
                         ${selectedSquare === key ? styles.cellSelected : ''}
                       `}
                       onMouseEnter={() => handleCellHover(ri, ci)}
-                      onClick={() => handleSquareClick(ri, ci)}
+                      onClick={(e) => handleSquareClick(ri, ci, e)}
                     >
                       <span className={styles.squareNum}>{squareNum}</span>
                       <span className={styles.ownerName}>{ownerName || ''}</span>
@@ -322,43 +341,49 @@ export function Grid({ searchQuery }: GridProps) {
         </div>
       </div>
 
-      {/* Detail card for selected square */}
-      {selectedData && config.boardLocked && (
-        <div className={styles.detailCard}>
-          <div className={styles.detailHeader}>
-            <span className={styles.detailCoord}>
-              [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
-            </span>
-            {selectedData.ownerName ? (
-              <span className={styles.detailOwner}>{selectedData.ownerName}</span>
-            ) : (
-              <span className={styles.detailUnclaimed}>Unclaimed</span>
-            )}
-            {selectedData.total > 0 && (
-              <span className={styles.detailTotal}>${selectedData.total.toLocaleString()}</span>
-            )}
-            <button className={styles.detailClose} onClick={() => setSelectedSquare(null)}>✕</button>
-          </div>
-          {selectedData.entries.length > 0 ? (
-            <div className={styles.detailGames}>
-              {selectedData.entries.map(({ game, payout }) => {
-                const winner = getGameWinner(game)
-                return (
-                  <div key={game.id} className={styles.detailGame}>
-                    <span className={styles.detailRound}>{ROUND_LABELS[game.round]}</span>
-                    <span className={styles.detailMatchup}>
-                      <span className={winner === 'A' ? styles.detailWinTeam : ''}>{game.teamA}</span>
-                      {' '}{game.scoreA}-{game.scoreB}{' '}
-                      <span className={winner === 'B' ? styles.detailWinTeam : ''}>{game.teamB}</span>
-                    </span>
-                    {payout > 0 && <span className={styles.detailPayout}>${payout}</span>}
-                  </div>
-                )
-              })}
+      {/* Detail popover for selected square */}
+      {selectedData && config.boardLocked && popoverPos && (
+        <div className={styles.popoverBackdrop} onClick={() => { setSelectedSquare(null); setPopoverPos(null) }}>
+          <div
+            className={styles.popover}
+            style={{ left: popoverPos.x, top: popoverPos.y }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className={styles.detailHeader}>
+              <span className={styles.detailCoord}>
+                [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
+              </span>
+              {selectedData.ownerName ? (
+                <span className={styles.detailOwner}>{selectedData.ownerName}</span>
+              ) : (
+                <span className={styles.detailUnclaimed}>Unclaimed</span>
+              )}
+              {selectedData.total > 0 && (
+                <span className={styles.detailTotal}>${selectedData.total.toLocaleString()}</span>
+              )}
+              <button className={styles.detailClose} onClick={() => { setSelectedSquare(null); setPopoverPos(null) }}>✕</button>
             </div>
-          ) : (
-            <div className={styles.detailEmpty}>No games on this square yet</div>
-          )}
+            {selectedData.entries.length > 0 ? (
+              <div className={styles.detailGames}>
+                {selectedData.entries.map(({ game, payout }) => {
+                  const winner = getGameWinner(game)
+                  return (
+                    <div key={game.id} className={styles.detailGame}>
+                      <span className={styles.detailRound}>{ROUND_LABELS[game.round]}</span>
+                      <span className={styles.detailMatchup}>
+                        <span className={winner === 'A' ? styles.detailWinTeam : ''}>{game.teamA}</span>
+                        {' '}{game.scoreA}-{game.scoreB}{' '}
+                        <span className={winner === 'B' ? styles.detailWinTeam : ''}>{game.teamB}</span>
+                      </span>
+                      {payout > 0 && <span className={styles.detailPayout}>${payout}</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className={styles.detailEmpty}>No games on this square yet</div>
+            )}
+          </div>
         </div>
       )}
 

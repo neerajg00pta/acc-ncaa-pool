@@ -50,7 +50,7 @@
   gap: 24px;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 960px) {
   .layout {
     flex-direction: row;
     align-items: flex-start;
@@ -64,7 +64,7 @@
   .sidebarArea {
     flex-shrink: 0;
     width: fit-content;
-    min-width: 380px;
+    min-width: 340px;
     max-width: 480px;
   }
 }

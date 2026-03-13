@@ -217,7 +217,7 @@ export function Grid({ searchQuery }: GridProps) {
                   const key = `${ri}-${ci}`
                   const sq = squareMap.get(key)
                   const ownerName = sq ? (userMap.get(sq.userId) || '???') : null
-                  const isMine = sq?.userId === currentUser?.id
+                  const isMine = !!(currentUser && sq && sq.userId === currentUser.id)
                   const totalPayout = payoutMap.map.get(key) || 0
                   const matchesSearch = !matchedUserIds || (sq && matchedUserIds.has(sq.userId))
                   const dimmed = matchedUserIds && !matchesSearch

@@ -44,14 +44,14 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
     }
 
     // Check if email already registered
-    if (users.some(u => u.code?.toLowerCase() === trimEmail)) {
+    if (users.some(u => u.email?.toLowerCase() === trimEmail)) {
       setError('That email is already registered — use Sign In')
       return
     }
 
     setSaving(true)
     try {
-      await createUser({ name: trimDisplay, code: trimEmail, email: trimEmail, fullName: trimFull })
+      await createUser({ name: trimDisplay, email: trimEmail, fullName: trimFull })
       await refresh()
       login(trimEmail)
       addToast(`Welcome, ${trimDisplay}!`, 'success')

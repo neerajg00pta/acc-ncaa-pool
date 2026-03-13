@@ -27,7 +27,8 @@ export async function getUsers(): Promise<User[]> {
   return (data ?? []).map(u => ({
     id: u.id,
     name: u.name,
-    code: u.code,
+    email: u.email,
+    fullName: u.full_name || undefined,
     admin: u.admin,
     paid: u.paid,
     createdAt: u.created_at,
@@ -101,11 +102,12 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
 
 // === User writes ===
 
-export async function createUser(user: { name: string; code: string; email?: string; fullName?: string }): Promise<User> {
+export async function createUser(user: { name: string; email: string; fullName?: string }): Promise<User> {
   const newUser: User = {
     id: `u${Date.now()}`,
     name: user.name,
-    code: user.code,
+    email: user.email,
+    fullName: user.fullName,
     admin: false,
     paid: false,
     createdAt: new Date().toISOString(),
@@ -113,8 +115,8 @@ export async function createUser(user: { name: string; code: string; email?: str
   const { error } = await supabase.from('users').insert({
     id: newUser.id,
     name: newUser.name,
-    code: newUser.code,
-    email: user.email || null,
+    email: newUser.email,
+    full_name: user.fullName || null,
     admin: false,
     paid: false,
     created_at: newUser.createdAt,
@@ -144,7 +146,8 @@ export async function saveUsers(updater: (users: User[]) => User[]): Promise<Use
       updated.map(u => ({
         id: u.id,
         name: u.name,
-        code: u.code,
+        email: u.email,
+        full_name: u.fullName || null,
         admin: u.admin,
         paid: u.paid,
         created_at: u.createdAt,

@@ -17,11 +17,11 @@ export function AdminPage() {
 
   // New player inline row state
   const [newName, setNewName] = useState('')
-  const [newCode, setNewCode] = useState('')
+  const [newEmail, setNewCode] = useState('')
   const [showNewRow, setShowNewRow] = useState(false)
 
   // Inline editing state
-  const [editingCell, setEditingCell] = useState<{ userId: string; field: 'name' | 'code' } | null>(null)
+  const [editingCell, setEditingCell] = useState<{ userId: string; field: 'name' | 'email' } | null>(null)
   const [editValue, setEditValue] = useState('')
   // Delete confirmation
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -118,9 +118,9 @@ export function AdminPage() {
 
   const addUser = async () => {
     const name = newName.trim()
-    const code = newCode.trim()
-    if (!name || !code) {
-      addToast('Name and code are required', 'error')
+    const email = newEmail.trim().toLowerCase()
+    if (!name || !email) {
+      addToast('Name and email are required', 'error')
       return
     }
 
@@ -131,7 +131,7 @@ export function AdminPage() {
         {
           id: `u${Date.now()}`,
           name,
-          code,
+          email,
           admin: false,
           paid: false,
           createdAt: new Date().toISOString(),
@@ -178,7 +178,7 @@ export function AdminPage() {
     finally { setSaving(false) }
   }
 
-  const startEdit = (userId: string, field: 'name' | 'code', currentValue: string) => {
+  const startEdit = (userId: string, field: 'name' | 'email', currentValue: string) => {
     setEditingCell({ userId, field })
     setEditValue(currentValue)
   }
@@ -284,7 +284,7 @@ export function AdminPage() {
           <button
             className={`${styles.btn} ${styles.btnSm}`}
             onClick={() => {
-              const emails = users.map(u => u.code).filter(c => c && c.includes('@')).join(', ')
+              const emails = users.map(u => u.email).filter(c => c && c.includes('@')).join(', ')
               navigator.clipboard.writeText(emails)
               addToast('Emails copied!', 'success')
             }}
@@ -293,7 +293,7 @@ export function AdminPage() {
           </button>
           <a
             className={`${styles.btn} ${styles.btnSm}`}
-            href={`mailto:${users.map(u => u.code).filter(c => c && c.includes('@')).join(',')}`}
+            href={`mailto:${users.map(u => u.email).filter(c => c && c.includes('@')).join(',')}`}
           >
             Email All
           </a>
@@ -304,8 +304,8 @@ export function AdminPage() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Code</th>
-                <th>Invite Link</th>
+                <th>Email</th>
+                <th>Invite</th>
                 <th>Sq</th>
                 <th>Payout</th>
                 <th>Admin</th>
@@ -333,7 +333,7 @@ export function AdminPage() {
                     )}
                   </td>
                   <td>
-                    {editingCell?.userId === user.id && editingCell.field === 'code' ? (
+                    {editingCell?.userId === user.id && editingCell.field === 'email' ? (
                       <input
                         className={styles.inlineInput}
                         value={editValue}
@@ -343,13 +343,13 @@ export function AdminPage() {
                         autoFocus
                       />
                     ) : (
-                      <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'code', user.code)}>
-                        <code className={styles.code}>{user.code}</code>
+                      <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'email', user.email)}>
+                        {user.email}
                       </button>
                     )}
                   </td>
                   <td>
-                    <button className={styles.copyLinkBtn} onClick={() => copyLink(user.code)}>
+                    <button className={styles.copyLinkBtn} onClick={() => copyLink(user.email)}>
                       Copy link
                     </button>
                   </td>
@@ -404,22 +404,22 @@ export function AdminPage() {
                       onChange={e => setNewName(e.target.value)}
                       placeholder="Player name"
                       autoFocus
-                      onBlur={() => { if (newName.trim() && newCode.trim()) addUser(); else if (!newName.trim() && !newCode.trim()) { setShowNewRow(false) } }}
+                      onBlur={() => { if (newName.trim() && newEmail.trim()) addUser(); else if (!newName.trim() && !newEmail.trim()) { setShowNewRow(false) } }}
                       onKeyDown={e => { if (e.key === 'Enter' && newName.trim()) { const next = e.currentTarget.parentElement?.nextElementSibling?.querySelector('input') as HTMLInputElement; next?.focus() } if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
                     />
                   </td>
                   <td>
                     <input
                       className={styles.inlineInput}
-                      value={newCode}
+                      value={newEmail}
                       onChange={e => setNewCode(e.target.value)}
-                      placeholder="Access code"
-                      onBlur={() => { if (newName.trim() && newCode.trim()) addUser() }}
-                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim() && newCode.trim()) addUser(); if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
+                      placeholder="Email address"
+                      onBlur={() => { if (newName.trim() && newEmail.trim()) addUser() }}
+                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim() && newEmail.trim()) addUser(); if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
                     />
                   </td>
                   <td className={styles.linkPreview}>
-                    {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
+                    {newEmail ? <span className={styles.linkText}>...?token={newEmail.trim()}</span> : '—'}
                   </td>
                   <td></td>
                   <td></td>

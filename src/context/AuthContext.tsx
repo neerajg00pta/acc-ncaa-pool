@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [adminActivated, setAdminActivated] = useState(() => getCookie('acc_pool_admin') === '1')
 
   const findByEmail = useCallback(
-    (email: string) => users.find(u => u.code?.toLowerCase() === email.toLowerCase()) || null,
+    (email: string) => users.find(u => u.email?.toLowerCase() === email.toLowerCase()) || null,
     [users]
   )
 

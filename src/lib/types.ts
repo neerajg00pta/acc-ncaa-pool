@@ -3,7 +3,8 @@
 export interface User {
   id: string
   name: string
-  code: string
+  email: string
+  fullName?: string
   admin: boolean
   paid: boolean
   createdAt: string

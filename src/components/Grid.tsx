@@ -278,7 +278,7 @@ export function Grid({ searchQuery }: GridProps) {
 
       <div className={styles.gridWithLoser}>
         <div className={styles.axisLabelLoser}>
-          <span>↑ LOSER ↓</span>
+          <span>← LOSER →</span>
         </div>
 
         <div className={styles.gridScroll}>

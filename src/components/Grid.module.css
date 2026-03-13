@@ -43,8 +43,8 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: #000;
-  background: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(240, 165, 0, 0.08);
   padding: 5px 0;
   border-radius: var(--radius);
 }
@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-blue);
+  background: rgba(88, 166, 255, 0.08);
   border-radius: var(--radius);
   margin-right: 4px;
 }
@@ -71,7 +71,7 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: #000;
+  color: var(--accent-blue);
   white-space: nowrap;
 }
 

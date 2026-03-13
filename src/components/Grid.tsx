@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext'
 import { saveSquares, updateConfig } from '../lib/github-data-service'
 import {
   type Game, type Square,
-  getGameStatus, gameToSquare, ownerColor,
+  getGameStatus, gameToSquare,
   ROUND_PAYOUTS, ROUND_LABELS, getGameWinner,
 } from '../lib/types'
 import styles from './Grid.module.css'

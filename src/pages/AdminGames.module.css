@@ -120,6 +120,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: fixed;
 }
 
 .table th {
@@ -133,8 +134,12 @@
 }
 
 .thNum { width: 36px; }
-.thScore { width: 64px; }
-.thStatus { width: 72px; }
+.thTeam { width: 18%; }
+.thScore { width: 56px; }
+.thStatus { width: 64px; }
+.thSquare { width: 56px; }
+.thPayout { width: 64px; }
+.thOwner { width: 15%; }
 
 .table td {
   padding: 3px 6px;
@@ -226,9 +231,47 @@
   background: rgba(139, 148, 158, 0.1);
 }
 
-.winnerCell {
+.squareCell {
   font-size: 12px;
   font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.payoutCell {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.ownerCell {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.unclaimed {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.csvBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+}
+
+.csvBtn:hover {
+  border-color: var(--accent-gold);
   color: var(--accent-gold);
 }
 

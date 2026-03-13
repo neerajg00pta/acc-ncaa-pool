@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext'
 import { saveGames } from '../lib/github-data-service'
 import {
   type Game,
-  getGameStatus, gameToSquare,
+  getGameStatus, getGameWinner, gameToSquare,
   ROUND_LABELS, ROUND_PAYOUTS, ROUNDS_IN_ORDER,
   generateInitialGames,
 } from '../lib/types'
@@ -89,18 +89,43 @@ export function AdminGamesPage() {
   const userNameMap = new Map<string, string>()
   users.forEach(u => userNameMap.set(u.id, u.name))
 
-  const getWinnerName = (game: Game): string | null => {
+  const getGameInfo = (game: Game) => {
     if (getGameStatus(game) !== 'final' || !config.rowNumbers || !config.colNumbers) return null
     const pos = gameToSquare(game, config.rowNumbers, config.colNumbers)
     if (!pos) return null
+    const squareLabel = `${config.colNumbers[pos.col]}${config.rowNumbers[pos.row]}`
     const uid = squareOwnerMap.get(`${pos.row}-${pos.col}`)
-    if (!uid) return '(unclaimed)'
-    return userNameMap.get(uid) || '???'
+    const ownerName = uid ? (userNameMap.get(uid) || '???') : 'Unclaimed'
+    return { squareLabel, ownerName }
   }
 
   // Stats
   const finalCount = games.filter(g => getGameStatus(g) === 'final').length
   const activeCount = games.filter(g => getGameStatus(g) === 'active').length
+
+  const downloadCsv = () => {
+    const header = 'Round,Game,Winning Team,Winning Score,Losing Team,Losing Score,Winning Square,Amount,Square Owner'
+    const csvRows = games
+      .filter(g => getGameStatus(g) === 'final')
+      .map(g => {
+        const winner = getGameWinner(g)
+        const winTeam = winner === 'A' ? g.teamA : g.teamB
+        const winScore = winner === 'A' ? g.scoreA : g.scoreB
+        const loseTeam = winner === 'A' ? g.teamB : g.teamA
+        const loseScore = winner === 'A' ? g.scoreB : g.scoreA
+        const info = getGameInfo(g)
+        return `"${ROUND_LABELS[g.round]}",${g.id},"${winTeam}",${winScore},"${loseTeam}",${loseScore},"${info?.squareLabel || ''}","$${ROUND_PAYOUTS[g.round]}","${info?.ownerName || ''}"`
+      })
+    const csv = [header, ...csvRows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'march-madness-winnings.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+    addToast('CSV downloaded', 'success')
+  }
 
   return (
     <div className={styles.page}>
@@ -112,6 +137,9 @@ export function AdminGamesPage() {
           <span className={styles.statScheduled}>{63 - finalCount - activeCount} scheduled</span>
         </div>
         {saving && <span className={styles.savingBadge}>Saving...</span>}
+        {finalCount > 0 && (
+          <button className={styles.csvBtn} onClick={downloadCsv}>Download CSV</button>
+        )}
       </div>
 
       {gamesByRound.map(({ round, games: roundGames }) => (
@@ -127,23 +155,30 @@ export function AdminGamesPage() {
               <thead>
                 <tr>
                   <th className={styles.thNum}>#</th>
-                  <th>Team A</th>
+                  <th className={styles.thTeam}>Team A</th>
                   <th className={styles.thScore}>Score</th>
-                  <th>Team B</th>
+                  <th className={styles.thTeam}>Team B</th>
                   <th className={styles.thScore}>Score</th>
                   <th className={styles.thStatus}>Status</th>
-                  <th>Winner</th>
+                  <th className={styles.thSquare}>Square</th>
+                  <th className={styles.thPayout}>Payout</th>
+                  <th className={styles.thOwner}>Owner</th>
                 </tr>
               </thead>
               <tbody>
-                {roundGames.map(game => (
-                  <GameRow
-                    key={game.id}
-                    game={game}
-                    onUpdate={updateGame}
-                    winnerName={getWinnerName(game)}
-                  />
-                ))}
+                {roundGames.map(game => {
+                  const info = getGameInfo(game)
+                  return (
+                    <GameRow
+                      key={game.id}
+                      game={game}
+                      onUpdate={updateGame}
+                      squareLabel={info?.squareLabel || null}
+                      ownerName={info?.ownerName || null}
+                      payout={getGameStatus(game) === 'final' ? ROUND_PAYOUTS[game.round] : null}
+                    />
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -156,11 +191,15 @@ export function AdminGamesPage() {
 function GameRow({
   game,
   onUpdate,
-  winnerName,
+  squareLabel,
+  ownerName,
+  payout,
 }: {
   game: Game
   onUpdate: (id: number, field: keyof Game, value: string) => void
-  winnerName: string | null
+  squareLabel: string | null
+  ownerName: string | null
+  payout: number | null
 }) {
   const status = getGameStatus(game)
 
@@ -208,8 +247,10 @@ function GameRow({
           {status}
         </span>
       </td>
-      <td className={styles.winnerCell}>
-        {winnerName || '—'}
+      <td className={styles.squareCell}>{squareLabel || '—'}</td>
+      <td className={styles.payoutCell}>{payout ? `$${payout.toLocaleString()}` : '—'}</td>
+      <td className={`${styles.ownerCell} ${ownerName === '(unclaimed)' ? styles.unclaimed : ''}`}>
+        {ownerName || '—'}
       </td>
     </tr>
   )

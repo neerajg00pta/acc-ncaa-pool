@@ -270,7 +270,9 @@ export function Grid({ searchQuery }: GridProps) {
               {config.boardLocked ? 'LOCKED' : 'OPEN'}
             </button>
           ) : (
-            config.boardLocked && <span className={styles.lockBadge}>LOCKED</span>
+            <span className={config.boardLocked ? styles.lockBadge : styles.openBadge}>
+              {config.boardLocked ? 'LOCKED' : 'OPEN'}
+            </span>
           )}
         </div>
         <div className={styles.axisLabelWinner}>← WINNER →</div>

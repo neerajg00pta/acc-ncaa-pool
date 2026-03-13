@@ -300,6 +300,16 @@
   border-radius: 3px;
 }
 
+.openBadge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent-green);
+  background: rgba(46, 160, 67, 0.15);
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
 /* Popover */
 .popoverBackdrop {
   position: fixed;

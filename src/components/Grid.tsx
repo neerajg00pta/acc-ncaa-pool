@@ -148,13 +148,13 @@ export function Grid({ searchQuery }: GridProps) {
         <div className={styles.axisLabelCorner}>
           {config.boardLocked && <span className={styles.lockIcon} title="Board is locked">🔒</span>}
         </div>
-        <div className={styles.axisLabelWinner}>WINNER →</div>
+        <div className={styles.axisLabelWinner}>← WINNER →</div>
       </div>
 
       <div className={styles.gridWithLoser}>
         {/* Loser label spanning rows */}
         <div className={styles.axisLabelLoser}>
-          <span>← LOSER</span>
+          <span>↑ LOSER ↓</span>
         </div>
 
         <div className={styles.gridScroll} onMouseLeave={clearHover}>

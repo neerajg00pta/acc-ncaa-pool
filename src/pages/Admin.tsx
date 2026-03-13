@@ -4,13 +4,14 @@ import { useData } from '../context/DataContext'
 import { useToast } from '../context/ToastContext'
 import { saveUsers, updateConfig } from '../lib/github-data-service'
 import type { User } from '../lib/types'
+import { getGameStatus, gameToSquare, ROUND_PAYOUTS } from '../lib/types'
 import styles from './Admin.module.css'
 
 const BASE_URL = `${window.location.origin}${window.location.pathname}`
 
 export function AdminPage() {
   const { isAdmin } = useAuth()
-  const { config, users, refresh } = useData()
+  const { config, users, squares, games, refresh } = useData()
   const { addToast } = useToast()
   const [saving, setSaving] = useState(false)
 
@@ -31,6 +32,23 @@ export function AdminPage() {
 
   const paidCount = users.filter(u => u.paid).length
   const totalCollected = paidCount * 100
+
+  // Compute total payout per user
+  const userPayouts = (() => {
+    const map = new Map<string, number>()
+    if (!config.rowNumbers || !config.colNumbers) return map
+    const squareOwner = new Map<string, string>()
+    squares.forEach(s => squareOwner.set(`${s.row}-${s.col}`, s.userId))
+    games.forEach(game => {
+      if (getGameStatus(game) !== 'final') return
+      const pos = gameToSquare(game, config.rowNumbers!, config.colNumbers!)
+      if (!pos) return
+      const uid = squareOwner.get(`${pos.row}-${pos.col}`)
+      if (!uid) return
+      map.set(uid, (map.get(uid) || 0) + ROUND_PAYOUTS[game.round])
+    })
+    return map
+  })()
 
   // === Board Controls ===
 
@@ -272,6 +290,7 @@ export function AdminPage() {
                 <th>Name</th>
                 <th>Code</th>
                 <th>Invite Link</th>
+                <th>Payout</th>
                 <th>Admin</th>
                 <th>Paid</th>
                 <th></th>
@@ -302,6 +321,7 @@ export function AdminPage() {
                   <td className={styles.linkPreview}>
                     {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
                   </td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td>
@@ -361,6 +381,9 @@ export function AdminPage() {
                     <button className={styles.copyLinkBtn} onClick={() => copyLink(user.code)}>
                       Copy link
                     </button>
+                  </td>
+                  <td className={styles.payoutCell}>
+                    {userPayouts.get(user.id) ? `$${userPayouts.get(user.id)!.toLocaleString()}` : '—'}
                   </td>
                   <td>
                     <button

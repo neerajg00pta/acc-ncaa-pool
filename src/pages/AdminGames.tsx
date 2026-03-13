@@ -5,14 +5,15 @@ import { useToast } from '../context/ToastContext'
 import { saveGames } from '../lib/github-data-service'
 import {
   type Game,
-  getGameStatus, ROUND_LABELS, ROUND_PAYOUTS, ROUNDS_IN_ORDER,
+  getGameStatus, gameToSquare,
+  ROUND_LABELS, ROUND_PAYOUTS, ROUNDS_IN_ORDER,
   generateInitialGames,
 } from '../lib/types'
 import styles from './AdminGames.module.css'
 
 export function AdminGamesPage() {
   const { isAdmin } = useAuth()
-  const { games, refresh } = useData()
+  const { config, games, squares, users, refresh } = useData()
   const { addToast } = useToast()
   const [saving, setSaving] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
@@ -82,6 +83,21 @@ export function AdminGamesPage() {
     games: games.filter(g => g.round === round),
   }))
 
+  // Build square owner + user name lookups for winner display
+  const squareOwnerMap = new Map<string, string>()
+  squares.forEach(s => squareOwnerMap.set(`${s.row}-${s.col}`, s.userId))
+  const userNameMap = new Map<string, string>()
+  users.forEach(u => userNameMap.set(u.id, u.name))
+
+  const getWinnerName = (game: Game): string | null => {
+    if (getGameStatus(game) !== 'final' || !config.rowNumbers || !config.colNumbers) return null
+    const pos = gameToSquare(game, config.rowNumbers, config.colNumbers)
+    if (!pos) return null
+    const uid = squareOwnerMap.get(`${pos.row}-${pos.col}`)
+    if (!uid) return '(unclaimed)'
+    return userNameMap.get(uid) || '???'
+  }
+
   // Stats
   const finalCount = games.filter(g => getGameStatus(g) === 'final').length
   const activeCount = games.filter(g => getGameStatus(g) === 'active').length
@@ -116,6 +132,7 @@ export function AdminGamesPage() {
                   <th>Team B</th>
                   <th className={styles.thScore}>Score</th>
                   <th className={styles.thStatus}>Status</th>
+                  <th>Winner</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,6 +141,7 @@ export function AdminGamesPage() {
                     key={game.id}
                     game={game}
                     onUpdate={updateGame}
+                    winnerName={getWinnerName(game)}
                   />
                 ))}
               </tbody>
@@ -138,9 +156,11 @@ export function AdminGamesPage() {
 function GameRow({
   game,
   onUpdate,
+  winnerName,
 }: {
   game: Game
   onUpdate: (id: number, field: keyof Game, value: string) => void
+  winnerName: string | null
 }) {
   const status = getGameStatus(game)
 
@@ -187,6 +207,9 @@ function GameRow({
         <span className={`${styles.statusBadge} ${styles[`status_${status}`]}`}>
           {status}
         </span>
+      </td>
+      <td className={styles.winnerCell}>
+        {winnerName || '—'}
       </td>
     </tr>
   )

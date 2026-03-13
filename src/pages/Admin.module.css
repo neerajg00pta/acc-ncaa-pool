@@ -280,3 +280,10 @@
 .copyLinkBtn:hover {
   background: rgba(88, 166, 255, 0.1);
 }
+
+.payoutCell {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-green);
+  font-size: 12px;
+}

@@ -13,6 +13,12 @@
   padding: 0 4px 8px;
 }
 
+.pinnedGap {
+  height: 8px;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 4px;
+}
+
 .list {
   display: flex;
   flex-direction: column;

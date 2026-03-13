@@ -78,21 +78,24 @@ export function Leaderboard() {
       <h2 className={styles.title}>Leaderboard</h2>
 
       {myEntry && (
-        <LeaderboardRow
-          entry={myEntry}
-          rank={myRank!}
-          isMine
-          config={config}
-        />
+        <>
+          <LeaderboardRow
+            entry={myEntry}
+            rank={myRank!}
+            isMine
+            config={config}
+          />
+          <div className={styles.pinnedGap} />
+        </>
       )}
 
       <div className={styles.list}>
-        {entries.map((entry, i) => entry.userId === currentUser?.id ? null : (
+        {entries.map((entry, i) => (
           <LeaderboardRow
             key={entry.userId}
             entry={entry}
             rank={i + 1}
-            isMine={false}
+            isMine={entry.userId === currentUser?.id}
             config={config}
           />
         ))}

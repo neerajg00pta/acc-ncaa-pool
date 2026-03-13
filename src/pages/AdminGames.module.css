@@ -225,3 +225,9 @@
   color: var(--text-secondary);
   background: rgba(139, 148, 158, 0.1);
 }
+
+.winnerCell {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-green);
+}

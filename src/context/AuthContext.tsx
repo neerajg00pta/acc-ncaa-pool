@@ -9,6 +9,7 @@ interface AuthState {
   logout: () => void
   isAdmin: boolean
   activateAdmin: () => boolean
+  deactivateAdmin: () => void
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -91,10 +92,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false
   }, [currentUser])
 
+  const deactivateAdmin = useCallback(() => {
+    setAdminActivated(false)
+    deleteCookie('acc_pool_admin')
+  }, [])
+
   const isAdmin = !!(currentUser?.admin && adminActivated)
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isAdmin, activateAdmin }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, isAdmin, activateAdmin, deactivateAdmin }}>
       {children}
     </AuthContext.Provider>
   )

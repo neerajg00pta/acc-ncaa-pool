@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext'
 import styles from './Layout.module.css'
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { currentUser, login, logout, isAdmin, activateAdmin } = useAuth()
+  const { currentUser, login, logout, isAdmin, activateAdmin, deactivateAdmin } = useAuth()
   const { loading } = useData()
   const { addToast } = useToast()
   const [emailInput, setEmailInput] = useState('')
@@ -20,11 +20,17 @@ export function Layout({ children }: { children: ReactNode }) {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       keyBuffer.current += e.key.toLowerCase()
-      keyBuffer.current = keyBuffer.current.slice(-5)
-      if (keyBuffer.current === 'admin') {
+      keyBuffer.current = keyBuffer.current.slice(-6)
+      if (keyBuffer.current.endsWith('admin')) {
         keyBuffer.current = ''
         if (activateAdmin()) {
           addToast('Admin mode activated', 'success')
+        }
+      } else if (keyBuffer.current.endsWith('player')) {
+        keyBuffer.current = ''
+        if (isAdmin) {
+          deactivateAdmin()
+          addToast('Player mode', 'success')
         }
       }
     }

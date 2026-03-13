@@ -224,7 +224,7 @@
 
 .payoutBadge {
   font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--accent-blue);
   background: var(--bg-primary);

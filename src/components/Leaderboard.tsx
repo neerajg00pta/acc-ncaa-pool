@@ -8,7 +8,7 @@ import {
 } from '../lib/types'
 import styles from './Leaderboard.module.css'
 
-export function Leaderboard() {
+export function Leaderboard({ searchQuery }: { searchQuery: string }) {
   const { config, users, squares, games } = useData()
   const { currentUser } = useAuth()
 
@@ -90,15 +90,19 @@ export function Leaderboard() {
       )}
 
       <div className={styles.list}>
-        {entries.map((entry, i) => (
-          <LeaderboardRow
-            key={entry.userId}
-            entry={entry}
-            rank={i + 1}
-            isMine={entry.userId === currentUser?.id}
-            config={config}
-          />
-        ))}
+        {entries.map((entry, i) => {
+          const searchLower = searchQuery.toLowerCase()
+          if (searchLower && !entry.userName.toLowerCase().includes(searchLower)) return null
+          return (
+            <LeaderboardRow
+              key={entry.userId}
+              entry={entry}
+              rank={i + 1}
+              isMine={entry.userId === currentUser?.id}
+              config={config}
+            />
+          )
+        })}
       </div>
     </div>
   )

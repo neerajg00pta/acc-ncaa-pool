@@ -45,7 +45,7 @@ export function HomePage() {
           <Grid searchQuery={searchQuery} />
         </div>
         <aside className={styles.sidebarArea}>
-          <Leaderboard />
+          <Leaderboard searchQuery={searchQuery} />
         </aside>
       </div>
     </div>

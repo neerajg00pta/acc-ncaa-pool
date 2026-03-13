@@ -297,52 +297,6 @@ export function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {showNewRow && (
-                <tr className={styles.newRow}>
-                  <td>
-                    <input
-                      className={styles.inlineInput}
-                      value={newName}
-                      onChange={e => setNewName(e.target.value)}
-                      placeholder="Player name"
-                      autoFocus
-                      onKeyDown={e => e.key === 'Enter' && addUser()}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={styles.inlineInput}
-                      value={newCode}
-                      onChange={e => setNewCode(e.target.value)}
-                      placeholder="Access code"
-                      onKeyDown={e => e.key === 'Enter' && addUser()}
-                    />
-                  </td>
-                  <td className={styles.linkPreview}>
-                    {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <div className={styles.newRowActions}>
-                      <button
-                        className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
-                        onClick={addUser}
-                        disabled={saving || !newName.trim() || !newCode.trim()}
-                      >
-                        Save
-                      </button>
-                      <button
-                        className={`${styles.btn} ${styles.btnSm}`}
-                        onClick={() => { setShowNewRow(false); setNewName(''); setNewCode('') }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
               {users.map(user => (
                 <tr key={user.id}>
                   <td>
@@ -421,6 +375,38 @@ export function AdminPage() {
                   </td>
                 </tr>
               ))}
+              {showNewRow && (
+                <tr className={styles.newRow}>
+                  <td>
+                    <input
+                      className={styles.inlineInput}
+                      value={newName}
+                      onChange={e => setNewName(e.target.value)}
+                      placeholder="Player name"
+                      autoFocus
+                      onBlur={() => { if (newName.trim() && newCode.trim()) addUser(); else if (!newName.trim() && !newCode.trim()) { setShowNewRow(false) } }}
+                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim()) { const next = e.currentTarget.parentElement?.nextElementSibling?.querySelector('input') as HTMLInputElement; next?.focus() } if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className={styles.inlineInput}
+                      value={newCode}
+                      onChange={e => setNewCode(e.target.value)}
+                      placeholder="Access code"
+                      onBlur={() => { if (newName.trim() && newCode.trim()) addUser() }}
+                      onKeyDown={e => { if (e.key === 'Enter' && newName.trim() && newCode.trim()) addUser(); if (e.key === 'Escape') { setShowNewRow(false); setNewName(''); setNewCode('') } }}
+                    />
+                  </td>
+                  <td className={styles.linkPreview}>
+                    {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

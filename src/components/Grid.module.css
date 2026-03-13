@@ -393,6 +393,35 @@
   margin-bottom: 2px;
 }
 
+.assignFilterInput {
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-default);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+}
+
+.assignFilterInput:focus { border-color: var(--accent-gold); }
+.assignFilterInput::placeholder { color: var(--text-muted); }
+
+.assignScroll {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignFullName {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
 .adminAssignBtn {
   padding: 5px 8px;
   border-radius: var(--radius);

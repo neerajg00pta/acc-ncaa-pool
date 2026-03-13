@@ -25,6 +25,7 @@ export function Grid({ searchQuery }: GridProps) {
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const [showRegister, setShowRegister] = useState(false)
   const [adminAction, setAdminAction] = useState<{ row: number; col: number; x: number; y: number } | null>(null)
+  const [assignFilter, setAssignFilter] = useState('')
   const [editingHeader, setEditingHeader] = useState<{ axis: 'row' | 'col'; index: number } | null>(null)
   const [editHeaderValue, setEditHeaderValue] = useState('')
 
@@ -116,6 +117,7 @@ export function Grid({ searchQuery }: GridProps) {
       if (isAdmin && e) {
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
         setAdminAction({ row, col, x: rect.left + rect.width / 2, y: rect.bottom + 8 })
+        setAssignFilter('')
       }
       return
     }
@@ -137,6 +139,7 @@ export function Grid({ searchQuery }: GridProps) {
       if (isAdmin && e) {
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
         setAdminAction({ row, col, x: rect.left + rect.width / 2, y: rect.bottom + 8 })
+        setAssignFilter('')
         return
       }
       if (mySquareCount >= config.maxSquaresPerPerson) {
@@ -438,15 +441,26 @@ export function Grid({ searchQuery }: GridProps) {
             )}
             <div className={styles.adminAssignList}>
               <span className={styles.adminAssignLabel}>Assign to:</span>
-              {users.map(u => (
-                <button
-                  key={u.id}
-                  className={styles.adminAssignBtn}
-                  onClick={() => adminAssign(u.id)}
-                >
-                  {u.name}
-                </button>
-              ))}
+              <input
+                className={styles.assignFilterInput}
+                value={assignFilter}
+                onChange={e => setAssignFilter(e.target.value)}
+                placeholder="Filter players..."
+                autoFocus
+              />
+              <div className={styles.assignScroll}>
+                {users
+                  .filter(u => !assignFilter || u.name.toLowerCase().includes(assignFilter.toLowerCase()) || (u.fullName && u.fullName.toLowerCase().includes(assignFilter.toLowerCase())))
+                  .map(u => (
+                    <button
+                      key={u.id}
+                      className={styles.adminAssignBtn}
+                      onClick={() => adminAssign(u.id)}
+                    >
+                      {u.name} <span className={styles.assignFullName}>{u.fullName && u.fullName !== u.name ? u.fullName : ''}</span>
+                    </button>
+                  ))}
+              </div>
             </div>
           </div>
         </div>

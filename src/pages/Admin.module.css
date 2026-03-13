@@ -289,9 +289,8 @@
 }
 
 .payoutCell {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--accent-blue);
-  font-size: 12px;
+  font-size: 13px;
 }

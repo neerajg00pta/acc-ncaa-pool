@@ -248,16 +248,11 @@
 }
 
 .payoutBadge {
-  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--accent-blue);
-  background: var(--bg-primary);
-  padding: 1px 4px;
-  border-radius: 3px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  margin-top: 2px;
 }
 
 /* Lock toggle for admin */

@@ -329,10 +329,10 @@ export function Grid({ searchQuery }: GridProps) {
                       onClick={(e) => handleSquareClick(ri, ci, e)}
                     >
                       <span className={styles.squareNum}>{squareNum}</span>
-                      <span className={styles.ownerName}>{ownerName || ''}</span>
-                      {totalPayout > 0 && (
-                        <span className={styles.payoutBadge}>${totalPayout}</span>
-                      )}
+                      <span className={styles.ownerName}>{ownerName || '\u00A0'}</span>
+                      <span className={styles.payoutBadge}>
+                        {totalPayout > 0 ? `$${totalPayout}` : '\u00A0'}
+                      </span>
                     </div>
                   )
                 })}

@@ -125,23 +125,21 @@ function LeaderboardRow({
     <div className={`${styles.row} ${isMine ? styles.rowMine : ''}`}>
       <button
         className={styles.rowHeader}
-        onClick={() => entry.payouts.length > 0 && setExpanded(!expanded)}
+        onClick={() => setExpanded(!expanded)}
       >
         <span className={styles.rank}>#{rank}</span>
         <span className={styles.name}>{entry.userName}</span>
         <span className={styles.winnings}>
           ${entry.totalWinnings.toLocaleString()}
         </span>
-        {entry.payouts.length > 0 && (
-          <span className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}>
-            ▸
+        <span className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}>
+          ▸
           </span>
-        )}
       </button>
 
       {expanded && (
         <div className={styles.breakdown}>
-          {entry.payouts.map(p => (
+          {entry.payouts.length > 0 ? entry.payouts.map(p => (
             <div key={p.gameId} className={styles.payoutRow}>
               <span className={styles.payoutSquare}>
                 [{config.colNumbers?.[p.squareCol]},{config.rowNumbers?.[p.squareRow]}]
@@ -152,7 +150,9 @@ function LeaderboardRow({
               <span className={styles.payoutRound}>{ROUND_LABELS[p.round]}</span>
               <span className={styles.payoutAmount}>${p.amount}</span>
             </div>
-          ))}
+          )) : (
+            <div className={styles.noWins}>No wins yet</div>
+          )}
         </div>
       )}
     </div>

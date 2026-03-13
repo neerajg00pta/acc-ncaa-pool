@@ -70,9 +70,22 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
     )
   }, [config, users, squares, games])
 
+  // Compute tie-aware ranks
+  const ranks = useMemo(() => {
+    const map = new Map<string, number>()
+    let rank = 1
+    for (let i = 0; i < entries.length; i++) {
+      if (i > 0 && entries[i].totalWinnings < entries[i - 1].totalWinnings) {
+        rank = i + 1
+      }
+      map.set(entries[i].userId, rank)
+    }
+    return map
+  }, [entries])
+
   // Pin current user to top
   const myEntry = currentUser ? entries.find(e => e.userId === currentUser.id) : null
-  const myRank = myEntry ? entries.indexOf(myEntry) + 1 : null
+  const myRank = myEntry ? ranks.get(myEntry.userId) ?? 1 : null
 
   return (
     <div className={styles.leaderboard}>
@@ -98,7 +111,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
             <LeaderboardRow
               key={entry.userId}
               entry={entry}
-              rank={i + 1}
+              rank={ranks.get(entry.userId) ?? i + 1}
               isMine={entry.userId === currentUser?.id}
               config={config}
             />

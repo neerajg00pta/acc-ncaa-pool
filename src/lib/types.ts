@@ -55,6 +55,7 @@ export interface Payout {
 export interface LeaderboardEntry {
   userId: string
   userName: string
+  displayName: string
   totalWinnings: number
   payouts: Payout[]
 }

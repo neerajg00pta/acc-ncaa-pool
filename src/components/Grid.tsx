@@ -195,7 +195,10 @@ export function Grid({ searchQuery }: GridProps) {
   const searchLower = searchQuery.toLowerCase()
   const matchedUserIds = useMemo(() => {
     if (!searchLower) return null
-    return new Set(users.filter(u => u.name.toLowerCase().includes(searchLower)).map(u => u.id))
+    return new Set(users.filter(u =>
+      u.name.toLowerCase().includes(searchLower) ||
+      (u.fullName && u.fullName.toLowerCase().includes(searchLower))
+    ).map(u => u.id))
   }, [searchLower, users])
 
   // Hover crosshair

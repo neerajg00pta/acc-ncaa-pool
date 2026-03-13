@@ -19,6 +19,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
       return users.map(u => ({
         userId: u.id,
         userName: u.fullName || u.name,
+        displayName: u.name,
         totalWinnings: 0,
         payouts: [],
       }))
@@ -53,7 +54,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
     // Aggregate by user
     const entryMap = new Map<string, LeaderboardEntry>()
     users.forEach(u => {
-      entryMap.set(u.id, { userId: u.id, userName: u.fullName || u.name, totalWinnings: 0, payouts: [] })
+      entryMap.set(u.id, { userId: u.id, userName: u.fullName || u.name, displayName: u.name, totalWinnings: 0, payouts: [] })
     })
     payouts.forEach(p => {
       const entry = entryMap.get(p.userId)
@@ -92,7 +93,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
       <div className={styles.list}>
         {entries.map((entry, i) => {
           const searchLower = searchQuery.toLowerCase()
-          if (searchLower && !entry.userName.toLowerCase().includes(searchLower)) return null
+          if (searchLower && !entry.userName.toLowerCase().includes(searchLower) && !entry.displayName.toLowerCase().includes(searchLower)) return null
           return (
             <LeaderboardRow
               key={entry.userId}

@@ -228,9 +228,9 @@ export function Grid({ searchQuery }: GridProps) {
                       onClick={() => handleSquareClick(ri, ci)}
                     >
                       <span className={styles.ownerName}>{ownerName || ''}</span>
-                      <span className={styles.payoutBadge}>
-                        {totalPayout > 0 ? `$${totalPayout}` : '\u00A0'}
-                      </span>
+                      {totalPayout > 0 && (
+                        <span className={styles.payoutBadge}>${totalPayout}</span>
+                      )}
                     </div>
                   )
                 })}

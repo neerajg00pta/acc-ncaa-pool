@@ -109,12 +109,13 @@
 
 .headerWinner {
   color: var(--accent-gold);
+  background: rgba(240, 165, 0, 0.08);
   height: 40px;
 }
 
 .headerLoser {
   color: var(--accent-blue);
-  /* No fixed height — stretches to match the square cell row */
+  background: rgba(88, 166, 255, 0.08);
 }
 
 .headerEditable {

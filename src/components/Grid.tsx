@@ -25,7 +25,6 @@ export function Grid({ searchQuery }: GridProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const [showRegister, setShowRegister] = useState(false)
-  const [pendingClaim, setPendingClaim] = useState<{ row: number; col: number } | null>(null)
   const [editingHeader, setEditingHeader] = useState<{ axis: 'row' | 'col'; index: number } | null>(null)
   const [editHeaderValue, setEditHeaderValue] = useState('')
 
@@ -108,7 +107,6 @@ export function Grid({ searchQuery }: GridProps) {
     // Not logged in — prompt to register
     if (!currentUser) {
       if (!existing) {
-        setPendingClaim({ row, col })
         setShowRegister(true)
       }
       return
@@ -146,7 +144,6 @@ export function Grid({ searchQuery }: GridProps) {
 
   const handleRegistered = () => {
     setShowRegister(false)
-    setPendingClaim(null)
   }
 
   const toggleLock = async () => {
@@ -384,7 +381,7 @@ export function Grid({ searchQuery }: GridProps) {
 
       {showRegister && (
         <RegisterModal
-          onClose={() => { setShowRegister(false); setPendingClaim(null) }}
+          onClose={() => setShowRegister(false)}
           onRegistered={handleRegistered}
         />
       )}

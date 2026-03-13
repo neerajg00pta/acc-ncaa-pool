@@ -262,16 +262,43 @@
 
 /* Lock toggle for admin */
 .lockToggle {
-  background: none;
   border: none;
-  font-size: 14px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  padding: 2px;
-  opacity: 0.8;
-  transition: opacity 0.15s;
+  padding: 3px 6px;
+  border-radius: 3px;
+  transition: all 0.15s;
 }
 
-.lockToggle:hover { opacity: 1; }
+.lockToggleLocked {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--accent-red);
+}
+
+.lockToggleLocked:hover {
+  background: rgba(248, 81, 73, 0.25);
+}
+
+.lockToggleOpen {
+  background: rgba(46, 160, 67, 0.15);
+  color: var(--accent-green);
+}
+
+.lockToggleOpen:hover {
+  background: rgba(46, 160, 67, 0.25);
+}
+
+.lockBadge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent-red);
+  background: rgba(248, 81, 73, 0.15);
+  padding: 3px 6px;
+  border-radius: 3px;
+}
 
 /* Popover */
 .popoverBackdrop {
@@ -306,6 +333,83 @@
 }
 
 .popoverClose:hover { color: var(--text-primary); }
+
+.adminPopover {
+  position: fixed;
+  transform: translateX(-50%);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: popIn 0.15s ease-out;
+  z-index: 151;
+}
+
+.adminPopoverHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.adminPopoverTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.adminDeleteBtn {
+  width: 100%;
+  padding: 6px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent-red);
+  background: rgba(248, 81, 73, 0.1);
+  color: var(--accent-red);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+
+.adminDeleteBtn:hover {
+  background: rgba(248, 81, 73, 0.2);
+}
+
+.adminAssignList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adminAssignLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.adminAssignBtn {
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.adminAssignBtn:hover {
+  background: var(--bg-elevated);
+  color: var(--accent-gold);
+}
 
 @keyframes popIn {
   from { transform: translateX(-50%) translateY(-4px); opacity: 0; }

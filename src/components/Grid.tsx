@@ -24,6 +24,7 @@ export function Grid({ searchQuery }: GridProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const [showRegister, setShowRegister] = useState(false)
+  const [adminAction, setAdminAction] = useState<{ row: number; col: number; x: number; y: number } | null>(null)
   const [editingHeader, setEditingHeader] = useState<{ axis: 'row' | 'col'; index: number } | null>(null)
   const [editHeaderValue, setEditHeaderValue] = useState('')
 
@@ -111,7 +112,13 @@ export function Grid({ searchQuery }: GridProps) {
       return
     }
 
-    if (existing && existing.userId !== currentUser.id) return
+    if (existing && existing.userId !== currentUser.id) {
+      if (isAdmin && e) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        setAdminAction({ row, col, x: rect.left + rect.width / 2, y: rect.bottom + 8 })
+      }
+      return
+    }
 
     if (existing) {
       // Unclaim
@@ -126,7 +133,12 @@ export function Grid({ searchQuery }: GridProps) {
         setClaiming(null)
       }
     } else {
-      // Claim
+      // Claim — admin can assign to others via popover
+      if (isAdmin && e) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        setAdminAction({ row, col, x: rect.left + rect.width / 2, y: rect.bottom + 8 })
+        return
+      }
       if (mySquareCount >= config.maxSquaresPerPerson) {
         addToast(`Max ${config.maxSquaresPerPerson} squares reached`, 'error')
         return
@@ -182,10 +194,31 @@ export function Grid({ searchQuery }: GridProps) {
     setEditingHeader(null)
   }
 
+  const adminDelete = async () => {
+    if (!adminAction) return
+    try {
+      await unclaimSquare(adminAction.row, adminAction.col)
+      refresh()
+    } catch { addToast('Failed', 'error') }
+    setAdminAction(null)
+  }
+
+  const adminAssign = async (userId: string) => {
+    if (!adminAction) return
+    const key = `${adminAction.row}-${adminAction.col}`
+    const existing = squareMap.get(key)
+    try {
+      if (existing) await unclaimSquare(adminAction.row, adminAction.col)
+      await claimSquare(adminAction.row, adminAction.col, userId)
+      refresh()
+    } catch { addToast('Failed', 'error') }
+    setAdminAction(null)
+  }
+
   // Esc to close popover
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setSelectedSquare(null); setPopoverPos(null) }
+      if (e.key === 'Escape') { setSelectedSquare(null); setPopoverPos(null); setAdminAction(null) }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -234,11 +267,11 @@ export function Grid({ searchQuery }: GridProps) {
       <div className={styles.axisLabelRow}>
         <div className={styles.axisLabelCorner}>
           {isAdmin ? (
-            <button className={styles.lockToggle} onClick={toggleLock} title={config.boardLocked ? 'Unlock board' : 'Lock board'}>
-              {config.boardLocked ? '🔒' : '🔓'}
+            <button className={`${styles.lockToggle} ${config.boardLocked ? styles.lockToggleLocked : styles.lockToggleOpen}`} onClick={toggleLock}>
+              {config.boardLocked ? 'LOCKED' : 'OPEN'}
             </button>
           ) : (
-            config.boardLocked && <span className={styles.lockIcon} title="Board is locked">🔒</span>
+            config.boardLocked && <span className={styles.lockBadge}>LOCKED</span>
           )}
         </div>
         <div className={styles.axisLabelWinner}>← WINNER →</div>
@@ -379,6 +412,41 @@ export function Grid({ searchQuery }: GridProps) {
                   <div className={lbStyles.noWins}>No games on this square yet</div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin action popover */}
+      {adminAction && (
+        <div className={styles.popoverBackdrop} onClick={() => setAdminAction(null)}>
+          <div
+            className={styles.adminPopover}
+            style={{ left: adminAction.x, top: adminAction.y }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className={styles.adminPopoverHeader}>
+              <span className={styles.adminPopoverTitle}>
+                Square #{adminAction.row * 10 + adminAction.col + 1}
+              </span>
+              <button className={styles.popoverClose} onClick={() => setAdminAction(null)}>✕</button>
+            </div>
+            {squareMap.get(`${adminAction.row}-${adminAction.col}`) && (
+              <button className={styles.adminDeleteBtn} onClick={adminDelete}>
+                Remove owner
+              </button>
+            )}
+            <div className={styles.adminAssignList}>
+              <span className={styles.adminAssignLabel}>Assign to:</span>
+              {users.map(u => (
+                <button
+                  key={u.id}
+                  className={styles.adminAssignBtn}
+                  onClick={() => adminAssign(u.id)}
+                >
+                  {u.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -110,12 +110,10 @@
 
 .headerWinner {
   color: var(--accent-gold);
-  background: rgba(240, 165, 0, 0.08);
 }
 
 .headerLoser {
   color: var(--accent-blue);
-  background: rgba(88, 166, 255, 0.08);
 }
 
 .headerEditable {
@@ -140,11 +138,11 @@
 }
 
 .headerHighlight.headerWinner {
-  background: rgba(240, 165, 0, 0.25) !important;
+  background: rgba(240, 165, 0, 0.15) !important;
 }
 
 .headerHighlight.headerLoser {
-  background: rgba(88, 166, 255, 0.25) !important;
+  background: rgba(88, 166, 255, 0.15) !important;
 }
 
 .cell {

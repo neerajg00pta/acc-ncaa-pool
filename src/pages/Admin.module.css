@@ -281,6 +281,13 @@
   background: rgba(88, 166, 255, 0.1);
 }
 
+.squaresCell {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 .payoutCell {
   font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-weight: 700;

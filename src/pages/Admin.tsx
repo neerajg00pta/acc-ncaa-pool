@@ -290,6 +290,7 @@ export function AdminPage() {
                 <th>Name</th>
                 <th>Code</th>
                 <th>Invite Link</th>
+                <th>Sq</th>
                 <th>Payout</th>
                 <th>Admin</th>
                 <th>Paid</th>
@@ -335,6 +336,9 @@ export function AdminPage() {
                     <button className={styles.copyLinkBtn} onClick={() => copyLink(user.code)}>
                       Copy link
                     </button>
+                  </td>
+                  <td className={styles.squaresCell}>
+                    {squares.filter(s => s.userId === user.id).length || '—'}
                   </td>
                   <td className={styles.payoutCell}>
                     {userPayouts.get(user.id) ? `$${userPayouts.get(user.id)!.toLocaleString()}` : '—'}
@@ -401,6 +405,7 @@ export function AdminPage() {
                   <td className={styles.linkPreview}>
                     {newCode ? <span className={styles.linkText}>...?token={newCode}</span> : '—'}
                   </td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>

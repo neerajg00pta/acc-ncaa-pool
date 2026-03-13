@@ -43,9 +43,16 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
       return
     }
 
-    // Check if email already registered
     if (users.some(u => u.email?.toLowerCase() === trimEmail)) {
       setError('That email is already registered — use Sign In')
+      return
+    }
+    if (users.some(u => u.name.toLowerCase() === trimDisplay.toLowerCase())) {
+      setError('That display name is taken — pick another')
+      return
+    }
+    if (users.some(u => u.fullName?.toLowerCase() === trimFull.toLowerCase())) {
+      setError('That name is already registered — use Sign In')
       return
     }
 

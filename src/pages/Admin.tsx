@@ -125,6 +125,18 @@ export function AdminPage() {
       addToast('Display name and email are required', 'error')
       return
     }
+    if (users.some(u => u.email.toLowerCase() === email)) {
+      addToast('Email already registered', 'error')
+      return
+    }
+    if (users.some(u => u.name.toLowerCase() === name.toLowerCase())) {
+      addToast('Display name already taken', 'error')
+      return
+    }
+    if (fullName && users.some(u => u.fullName?.toLowerCase() === fullName.toLowerCase())) {
+      addToast('Full name already registered', 'error')
+      return
+    }
 
     setSaving(true)
     try {
@@ -193,6 +205,16 @@ export function AdminPage() {
     let val = editValue.trim()
     if (!val) { setEditingCell(null); return }
     if (field === 'name') val = val.slice(0, 8)
+    const other = users.filter(u => u.id !== userId)
+    if (field === 'email' && other.some(u => u.email.toLowerCase() === val.toLowerCase())) {
+      addToast('Email already taken', 'error'); setEditingCell(null); return
+    }
+    if (field === 'name' && other.some(u => u.name.toLowerCase() === val.toLowerCase())) {
+      addToast('Display name already taken', 'error'); setEditingCell(null); return
+    }
+    if (field === 'fullName' && other.some(u => u.fullName?.toLowerCase() === val.toLowerCase())) {
+      addToast('Full name already taken', 'error'); setEditingCell(null); return
+    }
     setSaving(true)
     try {
       await saveUsers(prev =>

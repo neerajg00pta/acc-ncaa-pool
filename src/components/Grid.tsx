@@ -24,6 +24,8 @@ export function Grid({ searchQuery }: GridProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [showRegister, setShowRegister] = useState(false)
   const [pendingClaim, setPendingClaim] = useState<{ row: number; col: number } | null>(null)
+  const [editingHeader, setEditingHeader] = useState<{ axis: 'row' | 'col'; index: number } | null>(null)
+  const [editHeaderValue, setEditHeaderValue] = useState('')
 
   const { rowNumbers, colNumbers } = config
 
@@ -142,6 +144,32 @@ export function Grid({ searchQuery }: GridProps) {
     } catch { addToast('Failed', 'error') }
   }
 
+  const startHeaderEdit = (axis: 'row' | 'col', index: number) => {
+    if (!isAdmin || config.boardLocked) return
+    const nums = axis === 'row' ? rowNumbers : colNumbers
+    setEditingHeader({ axis, index })
+    setEditHeaderValue(nums ? String(nums[index]) : '')
+  }
+
+  const commitHeaderEdit = async () => {
+    if (!editingHeader) return
+    const val = parseInt(editHeaderValue)
+    if (isNaN(val) || val < 0 || val > 9) { setEditingHeader(null); return }
+    try {
+      await updateConfig(c => {
+        const nums = editingHeader.axis === 'row'
+          ? [...(c.rowNumbers || [0,1,2,3,4,5,6,7,8,9])]
+          : [...(c.colNumbers || [0,1,2,3,4,5,6,7,8,9])]
+        nums[editingHeader.index] = val
+        return editingHeader.axis === 'row'
+          ? { ...c, rowNumbers: nums }
+          : { ...c, colNumbers: nums }
+      })
+      await refresh()
+    } catch { addToast('Failed to update', 'error') }
+    setEditingHeader(null)
+  }
+
   // Search
   const searchLower = searchQuery.toLowerCase()
   const matchedUserIds = useMemo(() => {
@@ -202,15 +230,47 @@ export function Grid({ searchQuery }: GridProps) {
             <div className={styles.cornerCell} />
 
             {Array.from({ length: 10 }, (_, ci) => (
-              <div key={`ch-${ci}`} className={`${styles.headerCell} ${styles.headerWinner} ${hoverCol === ci ? styles.headerHighlight : ''}`}>
-                {colNumbers ? colNumbers[ci] : '?'}
+              <div
+                key={`ch-${ci}`}
+                className={`${styles.headerCell} ${styles.headerWinner} ${hoverCol === ci ? styles.headerHighlight : ''} ${isAdmin && !config.boardLocked ? styles.headerEditable : ''}`}
+                onClick={() => startHeaderEdit('col', ci)}
+              >
+                {editingHeader?.axis === 'col' && editingHeader.index === ci ? (
+                  <input
+                    className={styles.headerInput}
+                    value={editHeaderValue}
+                    onChange={e => setEditHeaderValue(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') commitHeaderEdit(); if (e.key === 'Escape') setEditingHeader(null) }}
+                    onBlur={commitHeaderEdit}
+                    autoFocus
+                    maxLength={1}
+                  />
+                ) : (
+                  colNumbers ? colNumbers[ci] : '?'
+                )}
               </div>
             ))}
 
             {Array.from({ length: 10 }, (_, ri) => (
               <>
-                <div key={`rh-${ri}`} className={`${styles.headerCell} ${styles.headerLoser} ${hoverRow === ri ? styles.headerHighlight : ''}`}>
-                  {rowNumbers ? rowNumbers[ri] : '?'}
+                <div
+                  key={`rh-${ri}`}
+                  className={`${styles.headerCell} ${styles.headerLoser} ${hoverRow === ri ? styles.headerHighlight : ''} ${isAdmin && !config.boardLocked ? styles.headerEditable : ''}`}
+                  onClick={() => startHeaderEdit('row', ri)}
+                >
+                  {editingHeader?.axis === 'row' && editingHeader.index === ri ? (
+                    <input
+                      className={styles.headerInput}
+                      value={editHeaderValue}
+                      onChange={e => setEditHeaderValue(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') commitHeaderEdit(); if (e.key === 'Escape') setEditingHeader(null) }}
+                      onBlur={commitHeaderEdit}
+                      autoFocus
+                      maxLength={1}
+                    />
+                  ) : (
+                    rowNumbers ? rowNumbers[ri] : '?'
+                  )}
                 </div>
 
                 {Array.from({ length: 10 }, (_, ci) => {
@@ -229,6 +289,8 @@ export function Grid({ searchQuery }: GridProps) {
                     : onHoverCol ? styles.cellCrosshairCol
                     : ''
 
+                  const squareNum = ri * 10 + ci + 1
+
                   return (
                     <div
                       key={key}
@@ -243,10 +305,10 @@ export function Grid({ searchQuery }: GridProps) {
                         ${crossClass}
                         ${selectedSquare === key ? styles.cellSelected : ''}
                       `}
-                      style={undefined}
                       onMouseEnter={() => handleCellHover(ri, ci)}
                       onClick={() => handleSquareClick(ri, ci)}
                     >
+                      <span className={styles.squareNum}>{squareNum}</span>
                       <span className={styles.ownerName}>{ownerName || ''}</span>
                       {totalPayout > 0 && (
                         <span className={styles.payoutBadge}>${totalPayout}</span>

@@ -118,6 +118,27 @@
   background: rgba(88, 166, 255, 0.08);
 }
 
+.headerEditable {
+  cursor: pointer;
+}
+
+.headerEditable:hover {
+  background: var(--bg-elevated) !important;
+}
+
+.headerInput {
+  width: 24px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--bg-input);
+  border: 1px solid var(--accent-gold);
+  border-radius: 3px;
+  color: var(--text-primary);
+  outline: none;
+  padding: 2px;
+}
+
 .headerHighlight.headerWinner {
   background: rgba(240, 165, 0, 0.25) !important;
 }
@@ -197,6 +218,17 @@
 
 .cellCrosshairBoth {
   background: rgba(240, 165, 0, 0.12);
+}
+
+.squareNum {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1;
+  opacity: 0.5;
 }
 
 .cellSelected {

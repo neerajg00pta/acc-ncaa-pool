@@ -144,7 +144,7 @@ function LeaderboardRow({
           {entry.payouts.map(p => (
             <div key={p.gameId} className={styles.payoutRow}>
               <span className={styles.payoutSquare}>
-                [{config.rowNumbers?.[p.squareRow]},{config.colNumbers?.[p.squareCol]}]
+                [{config.colNumbers?.[p.squareCol]},{config.rowNumbers?.[p.squareRow]}]
               </span>
               <span className={styles.payoutGame}>
                 {p.teamA} {p.scoreA}-{p.scoreB} {p.teamB}

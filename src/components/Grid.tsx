@@ -245,7 +245,7 @@ export function Grid({ searchQuery }: GridProps) {
         <div className={styles.detailCard}>
           <div className={styles.detailHeader}>
             <span className={styles.detailCoord}>
-              [{rowNumbers?.[selectedData.row]},{colNumbers?.[selectedData.col]}]
+              [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
             </span>
             {selectedData.ownerName ? (
               <span className={styles.detailOwner}>{selectedData.ownerName}</span>

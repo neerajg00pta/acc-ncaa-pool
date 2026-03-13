@@ -105,15 +105,16 @@
   font-size: 16px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  height: 40px;
 }
 
 .headerWinner {
   color: var(--accent-gold);
+  height: 40px;
 }
 
 .headerLoser {
   color: var(--accent-blue);
+  /* No fixed height — stretches to match the square cell row */
 }
 
 .headerEditable {

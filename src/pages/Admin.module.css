@@ -134,6 +134,24 @@
 
 .numberLabel { font-weight: 600; }
 
+.csvSmBtn {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.csvSmBtn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
 .numbers {
   font-variant-numeric: tabular-nums;
   font-weight: 700;

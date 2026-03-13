@@ -211,6 +211,32 @@ export function AdminPage() {
     addToast('Link copied!', 'success')
   }
 
+  const downloadSquaresCsv = () => {
+    const userById = new Map(users.map(u => [u.id, u]))
+    const squareOwner = new Map(squares.map(s => [`${s.row}-${s.col}`, s.userId]))
+    const header = 'Square,Winner #,Loser #,Owner,Full Name,Email'
+    const rows: string[] = []
+    for (let ri = 0; ri < 10; ri++) {
+      for (let ci = 0; ci < 10; ci++) {
+        const num = ri * 10 + ci + 1
+        const w = config.colNumbers ? config.colNumbers[ci] : ''
+        const l = config.rowNumbers ? config.rowNumbers[ri] : ''
+        const uid = squareOwner.get(`${ri}-${ci}`)
+        const u = uid ? userById.get(uid) : null
+        rows.push(`${num},${w},${l},"${u?.name || ''}","${u?.fullName || ''}","${u?.email || ''}"`)
+      }
+    }
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'squares-roster.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+    addToast('CSV downloaded', 'success')
+  }
+
   return (
     <div className={styles.admin}>
       <h1 className={styles.pageTitle}>Admin Panel</h1>
@@ -265,6 +291,9 @@ export function AdminPage() {
             <span className={styles.numbers}>{config.rowNumbers.join(' ')}</span>
             <span className={styles.numberLabel}>Cols:</span>
             <span className={styles.numbers}>{config.colNumbers?.join(' ')}</span>
+            <button className={styles.csvSmBtn} onClick={downloadSquaresCsv}>
+              Download Squares CSV
+            </button>
           </div>
         )}
       </section>

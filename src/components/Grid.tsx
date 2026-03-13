@@ -2,11 +2,11 @@ import { useState, useMemo, useCallback } from 'react'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { saveSquares } from '../lib/github-data-service'
+import { saveSquares, updateConfig } from '../lib/github-data-service'
 import {
   type Game, type Square,
   getGameStatus, gameToSquare, ownerColor,
-  ROUND_PAYOUTS, getGameWinner,
+  ROUND_PAYOUTS, ROUND_LABELS, getGameWinner,
 } from '../lib/types'
 import styles from './Grid.module.css'
 
@@ -16,10 +16,11 @@ interface GridProps {
 
 export function Grid({ searchQuery }: GridProps) {
   const { config, users, squares, games, refresh } = useData()
-  const { currentUser } = useAuth()
+  const { currentUser, isAdmin } = useAuth()
   const { addToast } = useToast()
-  const [claiming, setClaiming] = useState<string | null>(null) // "row-col" being claimed
+  const [claiming, setClaiming] = useState<string | null>(null)
   const [flashCell, setFlashCell] = useState<string | null>(null)
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
 
   const { rowNumbers, colNumbers } = config
 
@@ -55,7 +56,7 @@ export function Grid({ searchQuery }: GridProps) {
     return map
   }, [games, rowNumbers, colNumbers])
 
-  // Compute heat map values (total payout per square)
+  // Compute heat map values
   const payoutMap = useMemo(() => {
     const map = new Map<string, number>()
     let maxPayout = 0
@@ -67,7 +68,6 @@ export function Grid({ searchQuery }: GridProps) {
     return { map, maxPayout }
   }, [gameSquareMap])
 
-  // Count current user's squares
   const mySquareCount = useMemo(() => {
     if (!currentUser) return 0
     return squares.filter(s => s.userId === currentUser.id).length
@@ -78,12 +78,12 @@ export function Grid({ searchQuery }: GridProps) {
     const key = `${row}-${col}`
     const existing = squareMap.get(key)
 
+    // When board is locked, show detail card instead
     if (config.boardLocked) {
-      addToast('Board is locked', 'error')
+      setSelectedSquare(selectedSquare === key ? null : key)
       return
     }
 
-    // Click someone else's square — ignore
     if (existing && existing.userId !== currentUser.id) return
 
     setClaiming(key)
@@ -92,11 +92,9 @@ export function Grid({ searchQuery }: GridProps) {
 
     try {
       if (existing) {
-        // Unclaim
         await saveSquares(prev => prev.filter(s => !(s.row === row && s.col === col)))
         addToast('Released!', 'success')
       } else {
-        // Claim
         if (mySquareCount >= config.maxSquaresPerPerson) {
           addToast(`Max ${config.maxSquaresPerPerson} squares reached`, 'error')
           return
@@ -116,14 +114,20 @@ export function Grid({ searchQuery }: GridProps) {
     }
   }
 
-  // Search filtering
+  const toggleLock = async () => {
+    try {
+      await updateConfig(c => ({ ...c, boardLocked: !c.boardLocked }))
+      await refresh()
+      addToast(config.boardLocked ? 'Unlocked' : 'Locked', 'success')
+    } catch { addToast('Failed', 'error') }
+  }
+
+  // Search
   const searchLower = searchQuery.toLowerCase()
   const matchedUserIds = useMemo(() => {
     if (!searchLower) return null
     return new Set(users.filter(u => u.name.toLowerCase().includes(searchLower)).map(u => u.id))
   }, [searchLower, users])
-
-  // Search: always dim (same behavior on mobile and desktop)
 
   // Hover crosshair
   const [hoverRow, setHoverRow] = useState<number | null>(null)
@@ -137,135 +141,155 @@ export function Grid({ searchQuery }: GridProps) {
     setHoverCol(null)
   }, [])
 
+  // Detail card data
+  const selectedData = useMemo(() => {
+    if (!selectedSquare) return null
+    const sq = squareMap.get(selectedSquare)
+    const entries = gameSquareMap.get(selectedSquare) || []
+    const total = payoutMap.map.get(selectedSquare) || 0
+    const ownerName = sq ? userMap.get(sq.userId) || '???' : null
+    const [r, c] = selectedSquare.split('-').map(Number)
+    return { sq, entries, total, ownerName, row: r, col: c }
+  }, [selectedSquare, squareMap, gameSquareMap, payoutMap, userMap])
+
   return (
     <div className={styles.gridWrapper}>
       {!rowNumbers && (
         <div className={styles.banner + ' ' + styles.bannerInfo}>Numbers not yet assigned</div>
       )}
 
-      {/* Winner label spanning columns */}
+      {/* Winner label + admin lock toggle */}
       <div className={styles.axisLabelRow}>
         <div className={styles.axisLabelCorner}>
-          {config.boardLocked && <span className={styles.lockIcon} title="Board is locked">🔒</span>}
+          {isAdmin ? (
+            <button className={styles.lockToggle} onClick={toggleLock} title={config.boardLocked ? 'Unlock board' : 'Lock board'}>
+              {config.boardLocked ? '🔒' : '🔓'}
+            </button>
+          ) : (
+            config.boardLocked && <span className={styles.lockIcon} title="Board is locked">🔒</span>
+          )}
         </div>
         <div className={styles.axisLabelWinner}>← WINNER →</div>
       </div>
 
       <div className={styles.gridWithLoser}>
-        {/* Loser label spanning rows */}
         <div className={styles.axisLabelLoser}>
           <span>↑ LOSER ↓</span>
         </div>
 
         <div className={styles.gridScroll} onMouseLeave={clearHover}>
           <div className={styles.grid}>
-            {/* Corner cell */}
             <div className={styles.cornerCell} />
 
-            {/* Column headers (winner axis) */}
             {Array.from({ length: 10 }, (_, ci) => (
               <div key={`ch-${ci}`} className={`${styles.headerCell} ${styles.headerWinner} ${hoverCol === ci ? styles.headerHighlight : ''}`}>
                 {colNumbers ? colNumbers[ci] : '?'}
               </div>
             ))}
 
-            {/* Rows */}
             {Array.from({ length: 10 }, (_, ri) => (
               <>
-                {/* Row header (loser axis) */}
                 <div key={`rh-${ri}`} className={`${styles.headerCell} ${styles.headerLoser} ${hoverRow === ri ? styles.headerHighlight : ''}`}>
                   {rowNumbers ? rowNumbers[ri] : '?'}
                 </div>
 
-              {/* Square cells */}
-              {Array.from({ length: 10 }, (_, ci) => {
-                const key = `${ri}-${ci}`
-                const sq = squareMap.get(key)
-                const ownerName = sq ? (userMap.get(sq.userId) || '???') : null
-                const isMine = sq?.userId === currentUser?.id
-                const gameEntries = gameSquareMap.get(key)
-                const totalPayout = payoutMap.map.get(key) || 0
-                const heatLevel = payoutMap.maxPayout > 0 ? totalPayout / payoutMap.maxPayout : 0
+                {Array.from({ length: 10 }, (_, ci) => {
+                  const key = `${ri}-${ci}`
+                  const sq = squareMap.get(key)
+                  const ownerName = sq ? (userMap.get(sq.userId) || '???') : null
+                  const isMine = sq?.userId === currentUser?.id
+                  const totalPayout = payoutMap.map.get(key) || 0
+                  const heatLevel = payoutMap.maxPayout > 0 ? totalPayout / payoutMap.maxPayout : 0
+                  const matchesSearch = !matchedUserIds || (sq && matchedUserIds.has(sq.userId))
+                  const dimmed = matchedUserIds && !matchesSearch
+                  const onHoverRow = hoverRow === ri
+                  const onHoverCol = hoverCol === ci
+                  const crossClass = onHoverRow && onHoverCol
+                    ? styles.cellCrosshairBoth
+                    : onHoverRow ? styles.cellCrosshairRow
+                    : onHoverCol ? styles.cellCrosshairCol
+                    : ''
 
-                // Search visibility (dim non-matches on all devices)
-                const matchesSearch = !matchedUserIds || (sq && matchedUserIds.has(sq.userId))
-                const dimmed = matchedUserIds && !matchesSearch
-
-                const onHoverRow = hoverRow === ri
-                const onHoverCol = hoverCol === ci
-                const crossClass = onHoverRow && onHoverCol
-                  ? styles.cellCrosshairBoth
-                  : onHoverRow ? styles.cellCrosshairRow
-                  : onHoverCol ? styles.cellCrosshairCol
-                  : ''
-
-                return (
-                  <div
-                    key={key}
-                    className={`
-                      ${styles.cell}
-                      ${sq ? styles.cellClaimed : styles.cellEmpty}
-                      ${isMine ? styles.cellMine : ''}
-                      ${dimmed ? styles.cellDimmed : ''}
-                      ${matchesSearch && matchedUserIds ? styles.cellSearchMatch : ''}
-                      ${flashCell === key ? styles.cellFlash : ''}
-                      ${claiming === key ? styles.cellClaiming : ''}
-                      ${crossClass}
-                    `}
-                    style={
-                      sq && heatLevel > 0
-                        ? { borderColor: `color-mix(in srgb, var(--heat-hot) ${Math.round(heatLevel * 100)}%, var(--heat-cold))` }
-                        : sq
-                          ? { borderColor: ownerColor(sq.userId) + '60' }
-                          : undefined
-                    }
-                    onMouseEnter={() => handleCellHover(ri, ci)}
-                    onClick={() => handleSquareClick(ri, ci)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Square ${rowNumbers?.[ri] ?? ri}-${colNumbers?.[ci] ?? ci}${ownerName ? `, owned by ${ownerName}` : ', unclaimed'}`}
-                  >
-                    {ownerName && (
-                      <span
-                        className={styles.ownerName}
-                        style={{ color: ownerColor(sq!.userId) }}
-                      >
-                        {ownerName}
-                      </span>
-                    )}
-
-                    {gameEntries && gameEntries.map(({ game }) => (
-                      <GameChip key={game.id} game={game} />
-                    ))}
-
-                    {totalPayout > 0 && (
-                      <span className={styles.payoutBadge}>${totalPayout}</span>
-                    )}
-                  </div>
-                )
-              })}
-            </>
-          ))}
+                  return (
+                    <div
+                      key={key}
+                      className={`
+                        ${styles.cell}
+                        ${sq ? styles.cellClaimed : styles.cellEmpty}
+                        ${isMine ? styles.cellMine : ''}
+                        ${dimmed ? styles.cellDimmed : ''}
+                        ${matchesSearch && matchedUserIds ? styles.cellSearchMatch : ''}
+                        ${flashCell === key ? styles.cellFlash : ''}
+                        ${claiming === key ? styles.cellClaiming : ''}
+                        ${crossClass}
+                        ${selectedSquare === key ? styles.cellSelected : ''}
+                      `}
+                      style={
+                        sq && heatLevel > 0
+                          ? { borderColor: `color-mix(in srgb, var(--heat-hot) ${Math.round(heatLevel * 100)}%, var(--heat-cold))` }
+                          : sq
+                            ? { borderColor: ownerColor(sq.userId) + '60' }
+                            : undefined
+                      }
+                      onMouseEnter={() => handleCellHover(ri, ci)}
+                      onClick={() => handleSquareClick(ri, ci)}
+                    >
+                      {ownerName && (
+                        <span className={styles.ownerName} style={{ color: ownerColor(sq!.userId) }}>
+                          {ownerName}
+                        </span>
+                      )}
+                      {totalPayout > 0 && (
+                        <span className={styles.payoutBadge}>${totalPayout}</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </>
+            ))}
           </div>
         </div>
       </div>
-    </div>
-  )
-}
 
-function GameChip({ game }: { game: Game }) {
-  const status = getGameStatus(game)
-  const winner = getGameWinner(game)
-  const teamA = game.teamA?.slice(0, 4) || '???'
-  const teamB = game.teamB?.slice(0, 4) || '???'
-
-  return (
-    <div className={`${styles.gameChip} ${status === 'active' ? styles.gameChipActive : styles.gameChipFinal}`}>
-      <span className={winner === 'A' ? styles.teamWin : ''}>{teamA}</span>
-      <span className={styles.chipScore}>
-        {game.scoreA ?? '-'}-{game.scoreB ?? '-'}
-      </span>
-      <span className={winner === 'B' ? styles.teamWin : ''}>{teamB}</span>
+      {/* Detail card for selected square */}
+      {selectedData && config.boardLocked && (
+        <div className={styles.detailCard}>
+          <div className={styles.detailHeader}>
+            <span className={styles.detailCoord}>
+              [{rowNumbers?.[selectedData.row]},{colNumbers?.[selectedData.col]}]
+            </span>
+            {selectedData.ownerName ? (
+              <span className={styles.detailOwner}>{selectedData.ownerName}</span>
+            ) : (
+              <span className={styles.detailUnclaimed}>Unclaimed</span>
+            )}
+            {selectedData.total > 0 && (
+              <span className={styles.detailTotal}>${selectedData.total.toLocaleString()}</span>
+            )}
+            <button className={styles.detailClose} onClick={() => setSelectedSquare(null)}>✕</button>
+          </div>
+          {selectedData.entries.length > 0 ? (
+            <div className={styles.detailGames}>
+              {selectedData.entries.map(({ game, payout }) => {
+                const winner = getGameWinner(game)
+                return (
+                  <div key={game.id} className={styles.detailGame}>
+                    <span className={styles.detailRound}>{ROUND_LABELS[game.round]}</span>
+                    <span className={styles.detailMatchup}>
+                      <span className={winner === 'A' ? styles.detailWinTeam : ''}>{game.teamA}</span>
+                      {' '}{game.scoreA}-{game.scoreB}{' '}
+                      <span className={winner === 'B' ? styles.detailWinTeam : ''}>{game.teamB}</span>
+                    </span>
+                    {payout > 0 && <span className={styles.detailPayout}>${payout}</span>}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className={styles.detailEmpty}>No games on this square yet</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

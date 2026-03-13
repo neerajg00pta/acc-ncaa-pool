@@ -204,6 +204,12 @@
   background: rgba(240, 165, 0, 0.12);
 }
 
+.cellSelected {
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 0 2px var(--accent-gold);
+  z-index: 1;
+}
+
 .ownerName {
   font-size: 10px;
   font-weight: 700;
@@ -215,48 +221,130 @@
   white-space: nowrap;
 }
 
-.gameChip {
+.payoutBadge {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--accent-green);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Lock toggle for admin */
+.lockToggle {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.lockToggle:hover { opacity: 1; }
+
+/* Detail card */
+.detailCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  margin-top: 8px;
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.detailHeader {
   display: flex;
   align-items: center;
-  gap: 2px;
-  font-size: 8px;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.detailCoord {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
   font-weight: 600;
-  padding: 1px 3px;
-  border-radius: 3px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  max-width: 100%;
 }
 
-.gameChipActive {
-  background: rgba(46, 160, 67, 0.2);
+.detailOwner {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detailUnclaimed {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.detailTotal {
+  font-size: 14px;
+  font-weight: 800;
   color: var(--accent-green);
-  animation: pulse-green 2s infinite;
-}
-
-.gameChipFinal {
-  background: rgba(139, 148, 158, 0.15);
-  color: var(--text-secondary);
-}
-
-.chipScore {
-  font-size: 8px;
-  opacity: 0.8;
-}
-
-.teamWin {
-  font-weight: 800;
-}
-
-.payoutBadge {
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  font-size: 8px;
-  font-weight: 800;
-  color: var(--accent-gold);
-  background: rgba(0, 0, 0, 0.7);
-  padding: 1px 3px;
-  border-radius: 2px;
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
+}
+
+.detailClose {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.detailClose:hover { color: var(--text-primary); }
+
+.detailGames {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailGame {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 4px 0;
+  border-top: 1px solid var(--border-muted);
+}
+
+.detailRound {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 80px;
+}
+
+.detailMatchup {
+  flex: 1;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.detailWinTeam {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detailPayout {
+  font-weight: 700;
+  color: var(--accent-green);
+  font-variant-numeric: tabular-nums;
+}
+
+.detailEmpty {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px 0;
 }

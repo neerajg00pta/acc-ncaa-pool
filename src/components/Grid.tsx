@@ -245,8 +245,8 @@ export function Grid({ searchQuery }: GridProps) {
           <span>↑ LOSER ↓</span>
         </div>
 
-        <div className={styles.gridScroll} onMouseLeave={clearHover}>
-          <div className={styles.grid}>
+        <div className={styles.gridScroll}>
+          <div className={styles.grid} onMouseLeave={clearHover}>
             <div className={styles.cornerCell} />
 
             {Array.from({ length: 10 }, (_, ci) => (

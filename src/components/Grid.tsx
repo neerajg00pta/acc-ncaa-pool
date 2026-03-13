@@ -247,12 +247,13 @@ export function Grid({ searchQuery }: GridProps) {
 
         <div className={styles.gridScroll}>
           <div className={styles.grid} onMouseLeave={clearHover}>
-            <div className={styles.cornerCell} />
+            <div className={styles.cornerCell} onMouseEnter={clearHover} />
 
             {Array.from({ length: 10 }, (_, ci) => (
               <div
                 key={`ch-${ci}`}
                 className={`${styles.headerCell} ${styles.headerWinner} ${hoverCol === ci ? styles.headerHighlight : ''} ${isAdmin && !config.boardLocked ? styles.headerEditable : ''}`}
+                onMouseEnter={clearHover}
                 onClick={() => startHeaderEdit('col', ci)}
               >
                 {editingHeader?.axis === 'col' && editingHeader.index === ci ? (
@@ -276,6 +277,7 @@ export function Grid({ searchQuery }: GridProps) {
                 <div
                   key={`rh-${ri}`}
                   className={`${styles.headerCell} ${styles.headerLoser} ${hoverRow === ri ? styles.headerHighlight : ''} ${isAdmin && !config.boardLocked ? styles.headerEditable : ''}`}
+                  onMouseEnter={clearHover}
                   onClick={() => startHeaderEdit('row', ri)}
                 >
                   {editingHeader?.axis === 'row' && editingHeader.index === ri ? (

@@ -18,7 +18,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
       // No numbers assigned — show all users with $0
       return users.map(u => ({
         userId: u.id,
-        userName: u.name,
+        userName: u.fullName || u.name,
         totalWinnings: 0,
         payouts: [],
       }))
@@ -53,7 +53,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
     // Aggregate by user
     const entryMap = new Map<string, LeaderboardEntry>()
     users.forEach(u => {
-      entryMap.set(u.id, { userId: u.id, userName: u.name, totalWinnings: 0, payouts: [] })
+      entryMap.set(u.id, { userId: u.id, userName: u.fullName || u.name, totalWinnings: 0, payouts: [] })
     })
     payouts.forEach(p => {
       const entry = entryMap.get(p.userId)

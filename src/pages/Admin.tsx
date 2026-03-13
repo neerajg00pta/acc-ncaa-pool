@@ -190,8 +190,9 @@ export function AdminPage() {
   const commitEdit = async () => {
     if (!editingCell) return
     const { userId, field } = editingCell
-    const val = editValue.trim()
+    let val = editValue.trim()
     if (!val) { setEditingCell(null); return }
+    if (field === 'name') val = val.slice(0, 8)
     setSaving(true)
     try {
       await saveUsers(prev =>
@@ -342,10 +343,11 @@ export function AdminPage() {
                       <input
                         className={styles.inlineInput}
                         value={editValue}
-                        onChange={e => setEditValue(e.target.value)}
+                        onChange={e => setEditValue(e.target.value.slice(0, 8))}
                         onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingCell(null) }}
                         onBlur={commitEdit}
                         autoFocus
+                        maxLength={8}
                       />
                     ) : (
                       <button className={styles.cellBtn} onClick={() => startEdit(user.id, 'name', user.name)}>

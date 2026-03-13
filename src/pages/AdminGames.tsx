@@ -87,7 +87,7 @@ export function AdminGamesPage() {
   const squareOwnerMap = new Map<string, string>()
   squares.forEach(s => squareOwnerMap.set(`${s.row}-${s.col}`, s.userId))
   const userNameMap = new Map<string, string>()
-  users.forEach(u => userNameMap.set(u.id, u.name))
+  users.forEach(u => userNameMap.set(u.id, u.fullName || u.name))
 
   const getGameInfo = (game: Game) => {
     if (getGameStatus(game) !== 'final' || !config.rowNumbers || !config.colNumbers) return null

@@ -44,6 +44,12 @@ export function Grid({ searchQuery }: GridProps) {
     return map
   }, [users])
 
+  const userFullNameMap = useMemo(() => {
+    const map = new Map<string, string>()
+    users.forEach(u => map.set(u.id, u.fullName || u.name))
+    return map
+  }, [users])
+
   // Compute game-to-square mappings and payouts
   const gameSquareMap = useMemo(() => {
     const map = new Map<string, { game: Game; payout: number }[]>()
@@ -215,7 +221,7 @@ export function Grid({ searchQuery }: GridProps) {
     const sq = squareMap.get(selectedSquare)
     const entries = gameSquareMap.get(selectedSquare) || []
     const total = payoutMap.map.get(selectedSquare) || 0
-    const ownerName = sq ? userMap.get(sq.userId) || '???' : null
+    const ownerName = sq ? userFullNameMap.get(sq.userId) || '???' : null
     const [r, c] = selectedSquare.split('-').map(Number)
     return { sq, entries, total, ownerName, row: r, col: c }
   }, [selectedSquare, squareMap, gameSquareMap, payoutMap, userMap])

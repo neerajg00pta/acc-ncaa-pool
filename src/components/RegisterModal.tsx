@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function RegisterModal({ onClose, onRegistered }: Props) {
-  const { login } = useAuth()
+  const { loginDirect } = useAuth()
   const { users, refresh } = useData()
   const { addToast } = useToast()
   const [fullName, setFullName] = useState('')
@@ -51,9 +51,9 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
 
     setSaving(true)
     try {
-      await createUser({ name: trimDisplay, email: trimEmail, fullName: trimFull })
-      await refresh()
-      login(trimEmail)
+      const newUser = await createUser({ name: trimDisplay, email: trimEmail, fullName: trimFull })
+      loginDirect(newUser)
+      refresh()
       addToast(`Welcome, ${trimDisplay}!`, 'success')
       onRegistered()
     } catch {

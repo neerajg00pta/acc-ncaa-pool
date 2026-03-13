@@ -6,6 +6,7 @@ import { useData } from './DataContext'
 interface AuthState {
   currentUser: User | null
   login: (email: string) => boolean
+  loginDirect: (user: User) => void
   logout: () => void
   isAdmin: boolean
   activateAdmin: () => boolean
@@ -76,6 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [findByEmail]
   )
 
+  const loginDirect = useCallback((user: User) => {
+    setCurrentUser(user)
+    setCookie(SESSION_COOKIE_NAME, user.email, SESSION_EXPIRY_DAYS)
+  }, [])
+
   const logout = useCallback(() => {
     setCurrentUser(null)
     setAdminActivated(false)
@@ -100,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!(currentUser?.admin && adminActivated)
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isAdmin, activateAdmin, deactivateAdmin }}>
+    <AuthContext.Provider value={{ currentUser, login, loginDirect, logout, isAdmin, activateAdmin, deactivateAdmin }}>
       {children}
     </AuthContext.Provider>
   )

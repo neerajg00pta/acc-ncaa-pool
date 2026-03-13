@@ -231,3 +231,9 @@
   font-weight: 600;
   color: var(--accent-gold);
 }
+
+.roundPayout {
+  font-size: 12px;
+  color: var(--accent-blue);
+  font-weight: 600;
+}

@@ -211,7 +211,7 @@
 }
 
 .ownerName {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -222,7 +222,7 @@
 }
 
 .payoutBadge {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--accent-green);
   font-variant-numeric: tabular-nums;

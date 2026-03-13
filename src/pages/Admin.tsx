@@ -325,7 +325,9 @@ export function AdminPage() {
           </button>
           <a
             className={`${styles.btn} ${styles.btnSm}`}
-            href={`mailto:${users.map(u => u.email).filter(c => c && c.includes('@')).join(',')}`}
+            href={`mailto:?bcc=${users.map(u => u.email).filter(c => c && c.includes('@')).join(',')}`}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Email All
           </a>

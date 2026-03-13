@@ -41,6 +41,12 @@ export function Layout({ children }: { children: ReactNode }) {
         </Link>
 
         <div className={styles.headerRight}>
+          <Link
+            to="/rules"
+            className={`${styles.navLink} ${location.pathname === '/rules' ? styles.navLinkActive : ''}`}
+          >
+            Rules
+          </Link>
           {currentUser ? (
             <>
               <span className={styles.userName}>{currentUser.name}</span>

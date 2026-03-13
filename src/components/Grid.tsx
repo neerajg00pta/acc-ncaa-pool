@@ -227,12 +227,10 @@ export function Grid({ searchQuery }: GridProps) {
                       onMouseEnter={() => handleCellHover(ri, ci)}
                       onClick={() => handleSquareClick(ri, ci)}
                     >
-                      {ownerName && (
-                        <span className={styles.ownerName}>{ownerName}</span>
-                      )}
-                      {totalPayout > 0 && (
-                        <span className={styles.payoutBadge}>${totalPayout}</span>
-                      )}
+                      <span className={styles.ownerName}>{ownerName || ''}</span>
+                      <span className={styles.payoutBadge}>
+                        {totalPayout > 0 ? `$${totalPayout}` : '\u00A0'}
+                      </span>
                     </div>
                   )
                 })}

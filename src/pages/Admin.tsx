@@ -281,6 +281,22 @@ export function AdminPage() {
           >
             + Add Player
           </button>
+          <button
+            className={`${styles.btn} ${styles.btnSm}`}
+            onClick={() => {
+              const emails = users.map(u => u.code).filter(c => c && c.includes('@')).join(', ')
+              navigator.clipboard.writeText(emails)
+              addToast('Emails copied!', 'success')
+            }}
+          >
+            Copy Emails
+          </button>
+          <a
+            className={`${styles.btn} ${styles.btnSm}`}
+            href={`mailto:${users.map(u => u.code).filter(c => c && c.includes('@')).join(',')}`}
+          >
+            Email All
+          </a>
         </div>
 
         <div className={styles.tableWrap}>

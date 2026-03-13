@@ -14,9 +14,9 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
   const { login } = useAuth()
   const { users, refresh } = useData()
   const { addToast } = useToast()
-  const [name, setName] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
-  const [secret, setSecret] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -24,32 +24,37 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
     e.preventDefault()
     setError('')
 
-    const trimName = name.trim()
-    const trimSecret = secret.trim().toLowerCase()
-    const trimEmail = email.trim()
+    const trimFull = fullName.trim()
+    const trimDisplay = displayName.trim()
+    const trimEmail = email.trim().toLowerCase()
 
-    if (!trimName || !trimSecret) {
-      setError('Name and secret word are required')
+    if (!trimFull || !trimDisplay || !trimEmail) {
+      setError('All fields are required')
       return
     }
 
-    if (trimSecret.includes(' ')) {
-      setError('Secret word must be one word, no spaces')
+    if (trimDisplay.length > 8) {
+      setError('Display name must be 8 characters or less')
       return
     }
 
-    // Check if secret already taken
-    if (users.some(u => u.code === trimSecret)) {
-      setError('That secret word is already taken — pick another')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimEmail)) {
+      setError('Please enter a valid email')
+      return
+    }
+
+    // Check if email already registered
+    if (users.some(u => u.code?.toLowerCase() === trimEmail)) {
+      setError('That email is already registered — use Sign In')
       return
     }
 
     setSaving(true)
     try {
-      await createUser({ name: trimName, code: trimSecret, email: trimEmail })
+      await createUser({ name: trimDisplay, code: trimEmail, email: trimEmail, fullName: trimFull })
       await refresh()
-      login(trimSecret)
-      addToast(`Welcome, ${trimName}!`, 'success')
+      login(trimEmail)
+      addToast(`Welcome, ${trimDisplay}!`, 'success')
       onRegistered()
     } catch {
       setError('Something went wrong — try again')
@@ -63,48 +68,46 @@ export function RegisterModal({ onClose, onRegistered }: Props) {
       <div className={styles.card} onClick={e => e.stopPropagation()}>
         <h2 className={styles.title}>Join the Pool</h2>
         <p className={styles.subtitle}>
-          Pick a name and a secret word. You'll use the secret word to log back in on any device.
+          Sign up to claim squares. You'll use your email to log back in.
         </p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.field}>
-            <span className={styles.label}>Display Name</span>
+            <span className={styles.label}>Full Name</span>
             <input
               className={styles.input}
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="How your name shows on the board"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              placeholder="First and last name"
               autoFocus
             />
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>Email <span className={styles.optional}>(optional)</span></span>
+            <span className={styles.label}>Display Name <span className={styles.optional}>(max 8 chars, shown on board)</span></span>
+            <input
+              className={styles.input}
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value.slice(0, 8))}
+              placeholder="e.g. Marc"
+              maxLength={8}
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.label}>Email</span>
             <input
               className={styles.input}
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="For payout notifications"
+              placeholder="Your email — this is how you log in"
             />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Secret Word</span>
-            <input
-              className={styles.input}
-              value={secret}
-              onChange={e => setSecret(e.target.value.replace(/\s/g, ''))}
-              placeholder="One word — your personal login"
-            />
-            <span className={styles.hint}>
-              This is your password. Pick something easy to remember. One word, no spaces.
-            </span>
           </label>
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <button className={styles.submit} type="submit" disabled={saving || !name.trim() || !secret.trim()}>
+          <button className={styles.submit} type="submit" disabled={saving || !fullName.trim() || !displayName.trim() || !email.trim()}>
             {saving ? 'Joining...' : 'Join'}
           </button>
         </form>

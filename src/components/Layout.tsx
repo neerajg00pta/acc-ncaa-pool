@@ -1,26 +1,47 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { useToast } from '../context/ToastContext'
 import styles from './Layout.module.css'
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { currentUser, login, logout, isAdmin } = useAuth()
+  const { currentUser, login, logout, isAdmin, activateAdmin } = useAuth()
   const { loading } = useData()
-  const [codeInput, setCodeInput] = useState('')
+  const { addToast } = useToast()
+  const [emailInput, setEmailInput] = useState('')
   const [loginError, setLoginError] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const location = useLocation()
 
+  // Hidden admin activation: type "admin" anywhere on the page
+  const keyBuffer = useRef('')
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      keyBuffer.current += e.key.toLowerCase()
+      keyBuffer.current = keyBuffer.current.slice(-5)
+      if (keyBuffer.current === 'admin') {
+        keyBuffer.current = ''
+        if (activateAdmin()) {
+          addToast('Admin mode activated', 'success')
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [activateAdmin, addToast])
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!login(codeInput.trim())) {
+    const trimmed = emailInput.trim().toLowerCase()
+    if (!login(trimmed)) {
       setLoginError(true)
       setTimeout(() => setLoginError(false), 2000)
     } else {
       setShowLogin(false)
     }
-    setCodeInput('')
+    setEmailInput('')
   }
 
   if (loading) {
@@ -73,10 +94,10 @@ export function Layout({ children }: { children: ReactNode }) {
           ) : showLogin ? (
             <form onSubmit={handleLogin} className={styles.loginForm}>
               <input
-                type="text"
-                value={codeInput}
-                onChange={e => setCodeInput(e.target.value)}
-                placeholder="Your secret word"
+                type="email"
+                value={emailInput}
+                onChange={e => setEmailInput(e.target.value)}
+                placeholder="Your email"
                 className={`${styles.codeInput} ${loginError ? styles.codeInputError : ''}`}
                 autoFocus
               />

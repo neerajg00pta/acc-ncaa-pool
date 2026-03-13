@@ -101,7 +101,7 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
 
 // === User writes ===
 
-export async function createUser(user: { name: string; code: string; email?: string }): Promise<User> {
+export async function createUser(user: { name: string; code: string; email?: string; fullName?: string }): Promise<User> {
   const newUser: User = {
     id: `u${Date.now()}`,
     name: user.name,
@@ -114,6 +114,7 @@ export async function createUser(user: { name: string; code: string; email?: str
     id: newUser.id,
     name: newUser.name,
     code: newUser.code,
+    email: user.email || null,
     admin: false,
     paid: false,
     created_at: newUser.createdAt,

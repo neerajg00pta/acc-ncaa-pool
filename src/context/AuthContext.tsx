@@ -5,9 +5,10 @@ import { useData } from './DataContext'
 
 interface AuthState {
   currentUser: User | null
-  login: (code: string) => boolean
+  login: (email: string) => boolean
   logout: () => void
   isAdmin: boolean
+  activateAdmin: () => boolean
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -29,58 +30,71 @@ function deleteCookie(name: string) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { users } = useData()
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [adminActivated, setAdminActivated] = useState(() => getCookie('acc_pool_admin') === '1')
 
-  const findUser = useCallback(
-    (code: string) => users.find(u => u.code === code) || null,
+  const findByEmail = useCallback(
+    (email: string) => users.find(u => u.code?.toLowerCase() === email.toLowerCase()) || null,
     [users]
   )
 
   // Restore session from cookie
   useEffect(() => {
-    const savedCode = getCookie(SESSION_COOKIE_NAME)
-    if (savedCode && !currentUser) {
-      const user = findUser(savedCode)
+    const savedEmail = getCookie(SESSION_COOKIE_NAME)
+    if (savedEmail && !currentUser) {
+      const user = findByEmail(savedEmail)
       if (user) setCurrentUser(user)
     }
-  }, [users, currentUser, findUser])
+  }, [users, currentUser, findByEmail])
 
   // Auto-login via URL param
   useEffect(() => {
     const params = new URLSearchParams(window.location.search || window.location.hash.split('?')[1] || '')
     const token = params.get('token')
     if (token && !currentUser) {
-      const user = findUser(token)
+      const user = findByEmail(token)
       if (user) {
         setCurrentUser(user)
         setCookie(SESSION_COOKIE_NAME, token, SESSION_EXPIRY_DAYS)
-        // Clean up URL
         const url = new URL(window.location.href)
         url.searchParams.delete('token')
         window.history.replaceState({}, '', url.toString())
       }
     }
-  }, [users, currentUser, findUser])
+  }, [users, currentUser, findByEmail])
 
   const login = useCallback(
-    (code: string) => {
-      const user = findUser(code)
+    (email: string) => {
+      const user = findByEmail(email)
       if (user) {
         setCurrentUser(user)
-        setCookie(SESSION_COOKIE_NAME, code, SESSION_EXPIRY_DAYS)
+        setCookie(SESSION_COOKIE_NAME, email, SESSION_EXPIRY_DAYS)
         return true
       }
       return false
     },
-    [findUser]
+    [findByEmail]
   )
 
   const logout = useCallback(() => {
     setCurrentUser(null)
+    setAdminActivated(false)
     deleteCookie(SESSION_COOKIE_NAME)
+    deleteCookie('acc_pool_admin')
   }, [])
 
+  const activateAdmin = useCallback(() => {
+    if (currentUser?.admin) {
+      setAdminActivated(true)
+      setCookie('acc_pool_admin', '1', SESSION_EXPIRY_DAYS)
+      return true
+    }
+    return false
+  }, [currentUser])
+
+  const isAdmin = !!(currentUser?.admin && adminActivated)
+
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isAdmin: currentUser?.admin ?? false }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, isAdmin, activateAdmin }}>
       {children}
     </AuthContext.Provider>
   )

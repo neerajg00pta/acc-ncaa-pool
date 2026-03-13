@@ -54,19 +54,19 @@
 }
 
 .axisLabelLoser {
-  width: 22px;
+  width: 24px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(88, 166, 255, 0.08);
   border-radius: var(--radius);
-  margin-right: 4px;
+  margin-right: 6px;
+  padding: 8px 0;
 }
 
 .axisLabelLoser span {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+  writing-mode: vertical-lr;
   transform: rotate(180deg);
   font-size: 11px;
   font-weight: 800;
@@ -222,13 +222,13 @@
 
 .squareNum {
   position: absolute;
-  top: 2px;
-  left: 3px;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-muted);
+  top: 3px;
+  left: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
   line-height: 1;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .cellSelected {

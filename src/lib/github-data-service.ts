@@ -76,7 +76,15 @@ export async function fetchAllData() {
 // === Config writes ===
 
 export async function updateConfig(updater: (c: Config) => Config): Promise<Config> {
-  const current = await getConfig()
+  // Read fresh from Supabase (not cached raw URL)
+  const { data: row, error: readErr } = await supabase.from('config').select('*').eq('id', 1).single()
+  if (readErr) throw readErr
+  const current: Config = {
+    boardLocked: row.board_locked,
+    maxSquaresPerPerson: row.max_squares_per_person,
+    rowNumbers: row.row_numbers,
+    colNumbers: row.col_numbers,
+  }
   const updated = updater(current)
   const { error } = await supabase
     .from('config')
@@ -92,6 +100,27 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
 }
 
 // === User writes ===
+
+export async function createUser(user: { name: string; code: string; email?: string }): Promise<User> {
+  const newUser: User = {
+    id: `u${Date.now()}`,
+    name: user.name,
+    code: user.code,
+    admin: false,
+    paid: false,
+    createdAt: new Date().toISOString(),
+  }
+  const { error } = await supabase.from('users').insert({
+    id: newUser.id,
+    name: newUser.name,
+    code: newUser.code,
+    admin: false,
+    paid: false,
+    created_at: newUser.createdAt,
+  })
+  if (error) throw error
+  return newUser
+}
 
 export async function saveUsers(updater: (users: User[]) => User[]): Promise<User[]> {
   const current = await getUsers()

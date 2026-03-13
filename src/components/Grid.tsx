@@ -8,6 +8,7 @@ import {
   getGameStatus, gameToSquare,
   ROUND_PAYOUTS, ROUND_LABELS, getGameWinner,
 } from '../lib/types'
+import { RegisterModal } from './RegisterModal'
 import styles from './Grid.module.css'
 
 interface GridProps {
@@ -21,6 +22,8 @@ export function Grid({ searchQuery }: GridProps) {
   const [claiming, setClaiming] = useState<string | null>(null)
   const [flashCell, setFlashCell] = useState<string | null>(null)
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
+  const [showRegister, setShowRegister] = useState(false)
+  const [pendingClaim, setPendingClaim] = useState<{ row: number; col: number } | null>(null)
 
   const { rowNumbers, colNumbers } = config
 
@@ -74,13 +77,21 @@ export function Grid({ searchQuery }: GridProps) {
   }, [squares, currentUser])
 
   const handleSquareClick = async (row: number, col: number) => {
-    if (!currentUser) return
     const key = `${row}-${col}`
     const existing = squareMap.get(key)
 
     // When board is locked, show detail card instead
     if (config.boardLocked) {
       setSelectedSquare(selectedSquare === key ? null : key)
+      return
+    }
+
+    // Not logged in — prompt to register
+    if (!currentUser) {
+      if (!existing) {
+        setPendingClaim({ row, col })
+        setShowRegister(true)
+      }
       return
     }
 
@@ -111,6 +122,15 @@ export function Grid({ searchQuery }: GridProps) {
       addToast('Failed — try again', 'error')
     } finally {
       setClaiming(null)
+    }
+  }
+
+  const handleRegistered = () => {
+    setShowRegister(false)
+    // Claim the pending square after registration
+    if (pendingClaim) {
+      setTimeout(() => handleSquareClick(pendingClaim.row, pendingClaim.col), 300)
+      setPendingClaim(null)
     }
   }
 
@@ -278,6 +298,13 @@ export function Grid({ searchQuery }: GridProps) {
             <div className={styles.detailEmpty}>No games on this square yet</div>
           )}
         </div>
+      )}
+
+      {showRegister && (
+        <RegisterModal
+          onClose={() => { setShowRegister(false); setPendingClaim(null) }}
+          onRegistered={handleRegistered}
+        />
       )}
     </div>
   )

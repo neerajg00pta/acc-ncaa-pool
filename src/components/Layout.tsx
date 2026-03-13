@@ -9,6 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const { loading } = useData()
   const [codeInput, setCodeInput] = useState('')
   const [loginError, setLoginError] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   const location = useLocation()
 
   const handleLogin = (e: React.FormEvent) => {
@@ -16,6 +17,8 @@ export function Layout({ children }: { children: ReactNode }) {
     if (!login(codeInput.trim())) {
       setLoginError(true)
       setTimeout(() => setLoginError(false), 2000)
+    } else {
+      setShowLogin(false)
     }
     setCodeInput('')
   }
@@ -61,18 +64,23 @@ export function Layout({ children }: { children: ReactNode }) {
                 Log out
               </button>
             </>
-          ) : (
+          ) : showLogin ? (
             <form onSubmit={handleLogin} className={styles.loginForm}>
               <input
                 type="text"
                 value={codeInput}
                 onChange={e => setCodeInput(e.target.value)}
-                placeholder="Enter access code"
+                placeholder="Your secret word"
                 className={`${styles.codeInput} ${loginError ? styles.codeInputError : ''}`}
                 autoFocus
               />
               <button type="submit" className={styles.goBtn}>Go</button>
+              <button type="button" className={styles.cancelBtn} onClick={() => setShowLogin(false)}>✕</button>
             </form>
+          ) : (
+            <button className={styles.signInBtn} onClick={() => setShowLogin(true)}>
+              Sign in
+            </button>
           )}
         </div>
       </header>

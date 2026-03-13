@@ -79,6 +79,32 @@
   transition: all 0.15s;
 }
 
+.signInBtn {
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.signInBtn:hover {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.cancelBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px;
+}
+
 .logoutBtn:hover {
   border-color: var(--accent-red);
   color: var(--accent-red);

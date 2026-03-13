@@ -75,12 +75,14 @@
   }
 
   .gridArea {
-    flex-shrink: 0;
-    width: fit-content;
+    flex: 1;
+    min-width: 0;
   }
 
   .sidebarArea {
-    flex: 1;
-    min-width: 240px;
+    flex-shrink: 0;
+    width: fit-content;
+    min-width: 380px;
+    max-width: 480px;
   }
 }

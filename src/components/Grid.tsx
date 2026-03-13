@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { saveSquares, updateConfig } from '../lib/github-data-service'
+import { claimSquare, unclaimSquare, updateConfig } from '../lib/github-data-service'
 import {
   type Game, type Square,
   getGameStatus, gameToSquare,
@@ -21,7 +21,6 @@ export function Grid({ searchQuery }: GridProps) {
   const { currentUser, isAdmin } = useAuth()
   const { addToast } = useToast()
   const [claiming, setClaiming] = useState<string | null>(null)
-  const [flashCell, setFlashCell] = useState<string | null>(null)
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const [showRegister, setShowRegister] = useState(false)
@@ -114,31 +113,34 @@ export function Grid({ searchQuery }: GridProps) {
 
     if (existing && existing.userId !== currentUser.id) return
 
-    setClaiming(key)
-    setFlashCell(key)
-    setTimeout(() => setFlashCell(null), 400)
-
-    try {
-      if (existing) {
-        await saveSquares(prev => prev.filter(s => !(s.row === row && s.col === col)))
-        addToast('Released!', 'success')
-      } else {
-        if (mySquareCount >= config.maxSquaresPerPerson) {
-          addToast(`Max ${config.maxSquaresPerPerson} squares reached`, 'error')
-          return
-        }
-        await saveSquares(prev => [
-          ...prev,
-          { row, col, userId: currentUser.id, claimedAt: new Date().toISOString() },
-        ])
-        addToast('Claimed!', 'success')
+    if (existing) {
+      // Unclaim
+      setClaiming(key)
+      try {
+        await unclaimSquare(row, col)
+        refresh()
+      } catch (err) {
+        console.error('Unclaim error:', err)
+        addToast('Failed — try again', 'error')
+      } finally {
+        setClaiming(null)
       }
-      await refresh()
-    } catch (err) {
-      console.error('Square claim error:', err)
-      addToast('Failed — try again', 'error')
-    } finally {
-      setClaiming(null)
+    } else {
+      // Claim
+      if (mySquareCount >= config.maxSquaresPerPerson) {
+        addToast(`Max ${config.maxSquaresPerPerson} squares reached`, 'error')
+        return
+      }
+      setClaiming(key)
+      try {
+        await claimSquare(row, col, currentUser.id)
+        refresh()
+      } catch (err) {
+        console.error('Claim error:', err)
+        addToast('Failed — try again', 'error')
+      } finally {
+        setClaiming(null)
+      }
     }
   }
 
@@ -321,7 +323,7 @@ export function Grid({ searchQuery }: GridProps) {
                         ${isMine ? styles.cellMine : ''}
                         ${dimmed ? styles.cellDimmed : ''}
                         ${matchesSearch && matchedUserIds ? styles.cellSearchMatch : ''}
-                        ${flashCell === key ? styles.cellFlash : ''}
+
                         ${claiming === key ? styles.cellClaiming : ''}
                         ${crossClass}
                         ${selectedSquare === key ? styles.cellSelected : ''}

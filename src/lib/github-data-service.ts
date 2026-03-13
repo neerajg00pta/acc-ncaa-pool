@@ -161,6 +161,18 @@ export async function saveUsers(updater: (users: User[]) => User[]): Promise<Use
 
 // === Square writes ===
 
+export async function claimSquare(row: number, col: number, userId: string): Promise<void> {
+  const { error } = await supabase.from('squares').insert({
+    row, col, user_id: userId, claimed_at: new Date().toISOString(),
+  })
+  if (error) throw error
+}
+
+export async function unclaimSquare(row: number, col: number): Promise<void> {
+  const { error } = await supabase.from('squares').delete().eq('row', row).eq('col', col)
+  if (error) throw error
+}
+
 export async function saveSquares(updater: (squares: Square[]) => Square[]): Promise<Square[]> {
   const current = await getSquares()
   const updated = updater(current)

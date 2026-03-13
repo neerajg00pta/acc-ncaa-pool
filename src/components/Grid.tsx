@@ -328,7 +328,7 @@ export function Grid({ searchQuery }: GridProps) {
                       onMouseEnter={() => handleCellHover(ri, ci)}
                       onClick={(e) => handleSquareClick(ri, ci, e)}
                     >
-                      <span className={styles.squareNum}>{squareNum}</span>
+                      <span className={`${styles.squareNum} ${config.boardLocked ? styles.squareNumLocked : ''}`}>{squareNum}</span>
                       <span className={styles.ownerName}>{ownerName || '\u00A0'}</span>
                       <span className={styles.payoutBadge}>
                         {totalPayout > 0 ? `$${totalPayout}` : '\u00A0'}

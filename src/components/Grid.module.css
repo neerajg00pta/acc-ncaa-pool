@@ -230,6 +230,11 @@
   opacity: 0.4;
 }
 
+.squareNumLocked {
+  font-size: 9px;
+  opacity: 0.2;
+}
+
 .cellSelected {
   background: rgba(88, 166, 255, 0.12) !important;
   border-color: var(--accent-blue) !important;

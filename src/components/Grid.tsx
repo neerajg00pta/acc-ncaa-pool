@@ -199,7 +199,6 @@ export function Grid({ searchQuery }: GridProps) {
                   const ownerName = sq ? (userMap.get(sq.userId) || '???') : null
                   const isMine = sq?.userId === currentUser?.id
                   const totalPayout = payoutMap.map.get(key) || 0
-                  const heatLevel = payoutMap.maxPayout > 0 ? totalPayout / payoutMap.maxPayout : 0
                   const matchesSearch = !matchedUserIds || (sq && matchedUserIds.has(sq.userId))
                   const dimmed = matchedUserIds && !matchesSearch
                   const onHoverRow = hoverRow === ri
@@ -224,18 +223,12 @@ export function Grid({ searchQuery }: GridProps) {
                         ${crossClass}
                         ${selectedSquare === key ? styles.cellSelected : ''}
                       `}
-                      style={
-                        sq && heatLevel > 0
-                          ? { borderColor: `color-mix(in srgb, var(--heat-hot) ${Math.round(heatLevel * 100)}%, var(--heat-cold))` }
-                          : sq
-                            ? { borderColor: ownerColor(sq.userId) + '60' }
-                            : undefined
-                      }
+                      style={undefined}
                       onMouseEnter={() => handleCellHover(ri, ci)}
                       onClick={() => handleSquareClick(ri, ci)}
                     >
                       {ownerName && (
-                        <span className={styles.ownerName} style={{ color: ownerColor(sq!.userId) }}>
+                        <span className={`${styles.ownerName} ${isMine ? styles.ownerMine : ''}`}>
                           {ownerName}
                         </span>
                       )}

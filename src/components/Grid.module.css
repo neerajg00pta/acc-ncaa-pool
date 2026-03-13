@@ -219,12 +219,21 @@
   text-overflow: ellipsis;
   max-width: 100%;
   white-space: nowrap;
+  color: var(--accent-blue);
+}
+
+.ownerMine {
+  color: var(--accent-gold);
 }
 
 .payoutBadge {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--accent-green);
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  background: var(--bg-primary);
+  padding: 1px 4px;
+  border-radius: 3px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -285,9 +294,10 @@
 }
 
 .detailTotal {
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-size: 14px;
   font-weight: 800;
-  color: var(--accent-green);
+  color: var(--accent-gold);
   margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
@@ -337,8 +347,9 @@
 }
 
 .detailPayout {
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
   font-weight: 700;
-  color: var(--accent-green);
+  color: var(--accent-gold);
   font-variant-numeric: tabular-nums;
 }
 

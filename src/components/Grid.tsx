@@ -8,6 +8,7 @@ import {
   getGameStatus, gameToSquare,
   ROUND_PAYOUTS, ROUND_LABELS,
 } from '../lib/types'
+import { useLiveScoringState } from '../context/LiveScoringContext'
 import { RegisterModal } from './RegisterModal'
 import styles from './Grid.module.css'
 import lbStyles from './Leaderboard.module.css'
@@ -17,8 +18,9 @@ interface GridProps {
 }
 
 export function Grid({ searchQuery }: GridProps) {
-  const { config, users, squares, games, refresh } = useData()
+  const { config, users, squares, games, refresh, tick } = useData()
   const { currentUser, isAdmin } = useAuth()
+  const liveSt = useLiveScoringState()
   const { addToast } = useToast()
   const [claiming, setClaiming] = useState<string | null>(null)
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
@@ -261,6 +263,10 @@ export function Grid({ searchQuery }: GridProps) {
 
   return (
     <div className={styles.gridWrapper}>
+      {/* Debug — remove after fixing auto-update */}
+      <div style={{ fontSize: 10, color: '#888', textAlign: 'right', padding: '0 4px 2px', fontFamily: 'monospace' }}>
+        tick={tick} scored={games.filter(g => g.scoreA !== null).length} live={String(config.liveScoring)} admin={String(isAdmin)} espn={liveSt.espnGames.length} matches={liveSt.matches.length} err={liveSt.error || 'none'} poll={liveSt.lastPoll?.toLocaleTimeString() || 'never'}
+      </div>
       {/* Winner label + admin lock toggle */}
       <div className={styles.axisLabelRow}>
         <div className={styles.axisLabelCorner}>

@@ -157,8 +157,8 @@ function LeaderboardRow({
         <span className={styles.name}>{entry.userName}</span>
         <span className={styles.winnings}>
           ${entry.totalWinnings.toLocaleString()}
-          {hasLivePayouts && <span className={styles.liveBadge}> LIVE</span>}
         </span>
+        {hasLivePayouts && <span className={styles.liveBadge}>LIVE</span>}
         <span className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}>
           ▸
           </span>

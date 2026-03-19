@@ -15,6 +15,7 @@ export async function getConfig(): Promise<Config> {
     maxSquaresPerPerson: data.max_squares_per_person,
     rowNumbers: data.row_numbers,
     colNumbers: data.col_numbers,
+    liveScoring: data.live_scoring ?? false,
   }
 }
 
@@ -61,6 +62,9 @@ export async function getGames(): Promise<Game[]> {
     teamB: g.team_b,
     scoreA: g.score_a,
     scoreB: g.score_b,
+    status: g.status ?? 'scheduled',
+    scoreLocked: g.score_locked ?? false,
+    espnId: g.espn_id ?? null,
   }))
 }
 
@@ -85,6 +89,7 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
     maxSquaresPerPerson: row.max_squares_per_person,
     rowNumbers: row.row_numbers,
     colNumbers: row.col_numbers,
+    liveScoring: row.live_scoring ?? false,
   }
   const updated = updater(current)
   const { error } = await supabase
@@ -94,6 +99,7 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
       max_squares_per_person: updated.maxSquaresPerPerson,
       row_numbers: updated.rowNumbers,
       col_numbers: updated.colNumbers,
+      live_scoring: updated.liveScoring,
     })
     .eq('id', 1)
   if (error) throw error
@@ -220,6 +226,9 @@ export async function saveGames(updater: (games: Game[]) => Game[]): Promise<Gam
         team_b: g.teamB,
         score_a: g.scoreA,
         score_b: g.scoreB,
+        status: g.status,
+        score_locked: g.scoreLocked,
+        espn_id: g.espnId,
       }))
     )
     if (error) throw error

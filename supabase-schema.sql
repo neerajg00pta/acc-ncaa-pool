@@ -6,7 +6,8 @@ create table config (
   board_locked boolean not null default false,
   max_squares_per_person int not null default 10,
   row_numbers int[] default null,
-  col_numbers int[] default null
+  col_numbers int[] default null,
+  live_scoring boolean not null default false
 );
 
 insert into config (id) values (1);
@@ -37,7 +38,10 @@ create table games (
   team_a text not null default '',
   team_b text not null default '',
   score_a int default null,
-  score_b int default null
+  score_b int default null,
+  status text not null default 'scheduled',
+  score_locked boolean not null default false,
+  espn_id text default null
 );
 
 -- Seed 63 games

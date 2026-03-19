@@ -94,6 +94,12 @@
   border-color: var(--accent-red);
 }
 
+.btnSuccess {
+  background: rgba(46, 160, 67, 0.15);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
 .btnSm { padding: 4px 10px; font-size: 12px; }
 
 .inlineControl {

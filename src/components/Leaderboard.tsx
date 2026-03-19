@@ -31,7 +31,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
     squares.forEach(s => squareOwnerMap.set(`${s.row}-${s.col}`, s.userId))
 
     games.forEach(game => {
-      if (getGameStatus(game) !== 'final') return
+      if (getGameStatus(game) === 'scheduled') return
       const pos = gameToSquare(game, rowNumbers, colNumbers)
       if (!pos) return
       const key = `${pos.row}-${pos.col}`
@@ -87,6 +87,13 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
   const myEntry = currentUser ? entries.find(e => e.userId === currentUser.id) : null
   const myRank = myEntry ? ranks.get(myEntry.userId) ?? 1 : null
 
+  // Track which games are live for indicators
+  const liveGameIds = useMemo(() => {
+    const ids = new Set<number>()
+    games.forEach(g => { if (getGameStatus(g) === 'live') ids.add(g.id) })
+    return ids
+  }, [games])
+
   return (
     <div className={styles.leaderboard}>
       <h2 className={styles.title}>Leaderboard</h2>
@@ -98,6 +105,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
             rank={myRank!}
             isMine
             config={config}
+            liveGameIds={liveGameIds}
           />
           <div className={styles.pinnedGap} />
         </>
@@ -114,6 +122,7 @@ export function Leaderboard({ searchQuery }: { searchQuery: string }) {
               rank={ranks.get(entry.userId) ?? i + 1}
               isMine={entry.userId === currentUser?.id}
               config={config}
+              liveGameIds={liveGameIds}
             />
           )
         })}
@@ -127,13 +136,16 @@ function LeaderboardRow({
   rank,
   isMine,
   config,
+  liveGameIds,
 }: {
   entry: LeaderboardEntry
   rank: number
   isMine: boolean
   config: { rowNumbers: number[] | null; colNumbers: number[] | null }
+  liveGameIds: Set<number>
 }) {
   const [expanded, setExpanded] = useState(false)
+  const hasLivePayouts = entry.payouts.some(p => liveGameIds.has(p.gameId))
 
   return (
     <div className={`${styles.row} ${isMine ? styles.rowMine : ''}`}>
@@ -145,6 +157,7 @@ function LeaderboardRow({
         <span className={styles.name}>{entry.userName}</span>
         <span className={styles.winnings}>
           ${entry.totalWinnings.toLocaleString()}
+          {hasLivePayouts && <span className={styles.liveBadge}> LIVE</span>}
         </span>
         <span className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}>
           ▸
@@ -159,7 +172,10 @@ function LeaderboardRow({
                 [{config.colNumbers?.[p.squareCol]},{config.rowNumbers?.[p.squareRow]}]
               </span>
               <span className={styles.payoutGame}>
-                {p.teamA} {p.scoreA}-{p.scoreB} {p.teamB}
+                {p.scoreA >= p.scoreB
+                  ? <>{p.teamA} {p.scoreA}-{p.scoreB} {p.teamB}</>
+                  : <>{p.teamB} {p.scoreB}-{p.scoreA} {p.teamA}</>
+                }
               </span>
               <span className={styles.payoutRound}>{ROUND_LABELS[p.round]}</span>
               <span className={styles.payoutAmount}>${p.amount}</span>

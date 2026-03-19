@@ -55,15 +55,14 @@ export function Grid({ searchQuery }: GridProps) {
     const map = new Map<string, { game: Game; payout: number }[]>()
     if (!rowNumbers || !colNumbers) return map
     games.forEach(game => {
-      const status = getGameStatus(game)
-      if (status === 'scheduled') return
+      if (getGameStatus(game) === 'scheduled') return
       const pos = gameToSquare(game, rowNumbers, colNumbers)
       if (!pos) return
       const key = `${pos.row}-${pos.col}`
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push({
         game,
-        payout: status === 'final' ? ROUND_PAYOUTS[game.round] : 0,
+        payout: ROUND_PAYOUTS[game.round],
       })
     })
     return map
@@ -404,7 +403,11 @@ export function Grid({ searchQuery }: GridProps) {
                       [{colNumbers?.[selectedData.col]},{rowNumbers?.[selectedData.row]}]
                     </span>
                     <span className={lbStyles.payoutGame}>
-                      {game.teamA} {game.scoreA}-{game.scoreB} {game.teamB}
+                      {game.scoreA !== null && game.scoreB !== null && game.scoreA >= game.scoreB
+                        ? <>{game.teamA} {game.scoreA}-{game.scoreB} {game.teamB}</>
+                        : <>{game.teamB} {game.scoreB}-{game.scoreA} {game.teamA}</>
+                      }
+                      {getGameStatus(game) === 'live' && <span className={lbStyles.liveBadge}>LIVE</span>}
                     </span>
                     <span className={lbStyles.payoutRound}>{ROUND_LABELS[game.round]}</span>
                     {payout > 0 && <span className={lbStyles.payoutAmount}>${payout}</span>}

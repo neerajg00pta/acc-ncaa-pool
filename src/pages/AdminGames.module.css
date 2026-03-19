@@ -65,7 +65,7 @@
 }
 
 .statFinal { color: var(--text-secondary); }
-.statActive { color: var(--accent-green); }
+.statLive { color: var(--accent-green); }
 .statScheduled { color: var(--text-muted); }
 
 .savingBadge {
@@ -151,7 +151,7 @@
 }
 
 .row_final { opacity: 0.7; }
-.row_active td { background: rgba(46, 160, 67, 0.05); }
+.row_live td { background: rgba(46, 160, 67, 0.05); }
 
 .gameNum {
   font-size: 11px;
@@ -221,9 +221,10 @@
   background: var(--bg-primary);
 }
 
-.status_active {
+.status_live {
   color: var(--accent-green);
   background: rgba(46, 160, 67, 0.15);
+  animation: pulse 1.5s infinite;
 }
 
 .status_final {
@@ -280,3 +281,78 @@
   color: var(--accent-blue);
   font-weight: 600;
 }
+
+/* Live Scoring Toggle */
+
+.liveToggle {
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.liveToggle:hover {
+  border-color: var(--accent-green);
+}
+
+.liveToggleOn {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(46, 160, 67, 0.1);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  animation: pulse 1.5s infinite;
+}
+
+.lastPoll {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.pollError {
+  color: var(--accent-red);
+}
+
+/* Per-game lock icons */
+
+.lockIcon, .unlockIcon {
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: 2px;
+}
+
+.lockIcon { opacity: 0.8; }
+.unlockIcon { opacity: 0.3; }
+.unlockIcon:hover { opacity: 0.6; }
+
+.lockedInput {
+  border-color: rgba(139, 148, 158, 0.3) !important;
+  background: rgba(139, 148, 158, 0.05) !important;
+}
+
+/* ESPN match indicators */
+
+.thEspn { width: 36px; text-align: center; }
+
+.espnCell {
+  text-align: center;
+  font-size: 12px;
+}
+
+.espnLive { cursor: help; }
+.espnPre { cursor: help; }
+.espnUnmatched { cursor: help; }
+.espnNone { color: var(--text-muted); }

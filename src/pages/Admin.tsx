@@ -41,7 +41,7 @@ export function AdminPage() {
     const squareOwner = new Map<string, string>()
     squares.forEach(s => squareOwner.set(`${s.row}-${s.col}`, s.userId))
     games.forEach(game => {
-      if (getGameStatus(game) !== 'final') return
+      if (getGameStatus(game) === 'scheduled') return
       const pos = gameToSquare(game, config.rowNumbers!, config.colNumbers!)
       if (!pos) return
       const uid = squareOwner.get(`${pos.row}-${pos.col}`)
@@ -50,6 +50,19 @@ export function AdminPage() {
     })
     return map
   })()
+
+  // === Live Scoring Toggle ===
+
+  const toggleLiveScoring = async () => {
+    const willEnable = !config.liveScoring
+    setSaving(true)
+    try {
+      await updateConfig(c => ({ ...c, liveScoring: willEnable }))
+      await refresh()
+      addToast(willEnable ? 'Live scoring enabled' : 'Live scoring disabled', 'success')
+    } catch { addToast('Failed to toggle live scoring', 'error') }
+    finally { setSaving(false) }
+  }
 
   // === Board Controls ===
 
@@ -292,6 +305,14 @@ export function AdminPage() {
               ✕ Clear Numbers
             </button>
           )}
+
+          <button
+            className={`${styles.btn} ${config.liveScoring ? styles.btnSuccess : ''}`}
+            onClick={toggleLiveScoring}
+            disabled={saving}
+          >
+            {config.liveScoring ? '📡 Live Scoring ON' : '📡 Live Scoring OFF'}
+          </button>
 
           <div className={styles.inlineControl}>
             <label className={styles.label}>Max squares per person:</label>

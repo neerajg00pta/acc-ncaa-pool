@@ -2,13 +2,15 @@ import { useState, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useToast } from '../context/ToastContext'
-import { saveGames } from '../lib/github-data-service'
+import { saveGames, updateConfig } from '../lib/github-data-service'
 import {
   type Game,
   getGameStatus, getGameWinner, gameToSquare,
   ROUND_LABELS, ROUND_PAYOUTS, ROUNDS_IN_ORDER,
   generateInitialGames,
 } from '../lib/types'
+import { useLiveScoring } from '../hooks/useLiveScoring'
+import type { MatchResult } from '../lib/espn'
 import styles from './AdminGames.module.css'
 
 export function AdminGamesPage() {
@@ -17,6 +19,13 @@ export function AdminGamesPage() {
   const { addToast } = useToast()
   const [saving, setSaving] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  // Live scoring hook — only active when config.liveScoring is on
+  const liveScoring = useLiveScoring(config.liveScoring, games, refresh)
+
+  // Build match lookup: poolGameId → MatchResult
+  const matchMap = new Map<number, MatchResult>()
+  liveScoring.matches.forEach(m => matchMap.set(m.poolGameId, m))
 
   if (!isAdmin) {
     return <div className={styles.forbidden}>Admin access required.</div>
@@ -58,11 +67,30 @@ export function AdminGamesPage() {
         }
         if (field === 'scoreA' || field === 'scoreB') {
           const num = value === '' ? null : Number(value)
-          return { ...g, [field]: num }
+          // Auto-lock when manually editing scores while live scoring is on
+          const autoLock = config.liveScoring ? true : g.scoreLocked
+          return { ...g, [field]: num, scoreLocked: autoLock }
         }
         return g
       })
     )
+  }
+
+  const toggleGameLock = (gameId: number) => {
+    debouncedSave(prev =>
+      prev.map(g => g.id === gameId ? { ...g, scoreLocked: !g.scoreLocked } : g)
+    )
+  }
+
+  const toggleLiveScoring = async () => {
+    const willEnable = !config.liveScoring
+    setSaving(true)
+    try {
+      await updateConfig(c => ({ ...c, liveScoring: willEnable }))
+      await refresh()
+      addToast(willEnable ? 'Live scoring enabled' : 'Live scoring disabled', 'success')
+    } catch { addToast('Failed to toggle live scoring', 'error') }
+    finally { setSaving(false) }
   }
 
   if (games.length === 0) {
@@ -71,7 +99,7 @@ export function AdminGamesPage() {
         <h1>Game Management</h1>
         <p>No games yet. Initialize all 63 tournament games?</p>
         <button className={styles.initBtn} onClick={initGames} disabled={saving}>
-          🏀 Create 63 Games
+          Create 63 Games
         </button>
       </div>
     )
@@ -90,7 +118,7 @@ export function AdminGamesPage() {
   users.forEach(u => userNameMap.set(u.id, u.fullName || u.name))
 
   const getGameInfo = (game: Game) => {
-    if (getGameStatus(game) !== 'final' || !config.rowNumbers || !config.colNumbers) return null
+    if (getGameStatus(game) === 'scheduled' || !config.rowNumbers || !config.colNumbers) return null
     const pos = gameToSquare(game, config.rowNumbers, config.colNumbers)
     if (!pos) return null
     const squareLabel = `${config.colNumbers[pos.col]}${config.rowNumbers[pos.row]}`
@@ -101,7 +129,7 @@ export function AdminGamesPage() {
 
   // Stats
   const finalCount = games.filter(g => getGameStatus(g) === 'final').length
-  const activeCount = games.filter(g => getGameStatus(g) === 'active').length
+  const liveCount = games.filter(g => getGameStatus(g) === 'live').length
 
   const downloadCsv = () => {
     const header = 'Round,Game,Winning Team,Winning Score,Losing Team,Losing Score,Winning Square,Amount,Square Owner'
@@ -133,10 +161,28 @@ export function AdminGamesPage() {
         <h1 className={styles.title}>Games</h1>
         <div className={styles.stats}>
           <span className={styles.statFinal}>{finalCount} final</span>
-          <span className={styles.statActive}>{activeCount} active</span>
-          <span className={styles.statScheduled}>{63 - finalCount - activeCount} scheduled</span>
+          <span className={styles.statLive}>{liveCount} live</span>
+          <span className={styles.statScheduled}>{63 - finalCount - liveCount} scheduled</span>
         </div>
         {saving && <span className={styles.savingBadge}>Saving...</span>}
+
+        {/* Live Scoring Toggle */}
+        <button
+          className={`${styles.liveToggle} ${config.liveScoring ? styles.liveToggleOn : ''}`}
+          onClick={toggleLiveScoring}
+          disabled={saving}
+        >
+          {config.liveScoring && <span className={styles.liveDot} />}
+          {config.liveScoring ? 'Live Scoring ON' : 'Live Scoring OFF'}
+        </button>
+
+        {config.liveScoring && liveScoring.lastPoll && (
+          <span className={styles.lastPoll}>
+            Last poll: {liveScoring.lastPoll.toLocaleTimeString()}
+            {liveScoring.error && <span className={styles.pollError}> ({liveScoring.error})</span>}
+          </span>
+        )}
+
         {finalCount > 0 && (
           <button className={styles.csvBtn} onClick={downloadCsv}>Download CSV</button>
         )}
@@ -160,6 +206,7 @@ export function AdminGamesPage() {
                   <th className={styles.thTeam}>Team B</th>
                   <th className={styles.thScore}>Score</th>
                   <th className={styles.thStatus}>Status</th>
+                  {config.liveScoring && <th className={styles.thEspn}>ESPN</th>}
                   <th className={styles.thSquare}>Square</th>
                   <th className={styles.thPayout}>Payout</th>
                   <th className={styles.thOwner}>Owner</th>
@@ -168,14 +215,18 @@ export function AdminGamesPage() {
               <tbody>
                 {roundGames.map(game => {
                   const info = getGameInfo(game)
+                  const match = matchMap.get(game.id)
                   return (
                     <GameRow
                       key={game.id}
                       game={game}
                       onUpdate={updateGame}
+                      onToggleLock={toggleGameLock}
                       squareLabel={info?.squareLabel || null}
                       ownerName={info?.ownerName || null}
-                      payout={getGameStatus(game) === 'final' ? ROUND_PAYOUTS[game.round] : null}
+                      payout={getGameStatus(game) !== 'scheduled' ? ROUND_PAYOUTS[game.round] : null}
+                      liveEnabled={config.liveScoring}
+                      espnMatch={match || null}
                     />
                   )
                 })}
@@ -191,21 +242,34 @@ export function AdminGamesPage() {
 function GameRow({
   game,
   onUpdate,
+  onToggleLock,
   squareLabel,
   ownerName,
   payout,
+  liveEnabled,
+  espnMatch,
 }: {
   game: Game
   onUpdate: (id: number, field: keyof Game, value: string) => void
+  onToggleLock: (id: number) => void
   squareLabel: string | null
   ownerName: string | null
   payout: number | null
+  liveEnabled: boolean
+  espnMatch: MatchResult | null
 }) {
   const status = getGameStatus(game)
 
   return (
     <tr className={`${styles.row} ${styles[`row_${status}`]}`}>
-      <td className={styles.gameNum}>{game.id}</td>
+      <td className={styles.gameNum}>
+        {liveEnabled && (
+          game.scoreLocked
+            ? <span className={styles.lockIcon} title="Score locked — click to unlock" onClick={() => onToggleLock(game.id)}>&#x1F512;</span>
+            : <span className={styles.unlockIcon} title="Click to lock score" onClick={() => onToggleLock(game.id)}>&#x1F513;</span>
+        )}
+        {game.id}
+      </td>
       <td>
         <input
           className={styles.teamInput}
@@ -216,7 +280,7 @@ function GameRow({
       </td>
       <td>
         <input
-          className={styles.scoreInput}
+          className={`${styles.scoreInput} ${game.scoreLocked ? styles.lockedInput : ''}`}
           type="number"
           min={0}
           value={game.scoreA ?? ''}
@@ -234,7 +298,7 @@ function GameRow({
       </td>
       <td>
         <input
-          className={styles.scoreInput}
+          className={`${styles.scoreInput} ${game.scoreLocked ? styles.lockedInput : ''}`}
           type="number"
           min={0}
           value={game.scoreB ?? ''}
@@ -244,9 +308,30 @@ function GameRow({
       </td>
       <td>
         <span className={`${styles.statusBadge} ${styles[`status_${status}`]}`}>
-          {status}
+          {status === 'live' ? 'LIVE' : status}
         </span>
       </td>
+      {liveEnabled && (
+        <td className={styles.espnCell}>
+          {espnMatch ? (
+            espnMatch.espnGame.status === 'scheduled' ? (
+              <span className={styles.espnPre} title={`Linked — ${espnMatch.espnGame.detail}`}>
+                &#x1F7E1;
+              </span>
+            ) : (
+              <span className={styles.espnLive} title={espnMatch.espnGame.detail}>
+                &#x1F7E2;
+              </span>
+            )
+          ) : (game.teamA || game.teamB) ? (
+            <span className={styles.espnUnmatched} title="No ESPN match found">
+              &#x1F534;
+            </span>
+          ) : (
+            <span className={styles.espnNone}>—</span>
+          )}
+        </td>
+      )}
       <td className={styles.squareCell}>{squareLabel || '—'}</td>
       <td className={styles.payoutCell}>{payout ? `$${payout.toLocaleString()}` : '—'}</td>
       <td className={`${styles.ownerCell} ${ownerName === '(unclaimed)' ? styles.unclaimed : ''}`}>

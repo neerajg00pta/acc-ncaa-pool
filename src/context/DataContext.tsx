@@ -16,7 +16,7 @@ interface DataState {
 const DataContext = createContext<DataState | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<Config>({ boardLocked: false, maxSquaresPerPerson: 10, rowNumbers: null, colNumbers: null })
+  const [config, setConfig] = useState<Config>({ boardLocked: false, maxSquaresPerPerson: 10, rowNumbers: null, colNumbers: null, liveScoring: false })
   const [users, setUsers] = useState<User[]>([])
   const [squares, setSquares] = useState<Square[]>([])
   const [games, setGames] = useState<Game[]>([])

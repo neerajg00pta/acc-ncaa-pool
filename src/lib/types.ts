@@ -24,6 +24,9 @@ export interface Game {
   teamB: string
   scoreA: number | null
   scoreB: number | null
+  status: GameStatus
+  scoreLocked: boolean
+  espnId: string | null
 }
 
 export interface Config {
@@ -31,11 +34,12 @@ export interface Config {
   maxSquaresPerPerson: number
   rowNumbers: number[] | null
   colNumbers: number[] | null
+  liveScoring: boolean
 }
 
 export type Round = 'R64' | 'R32' | 'S16' | 'E8' | 'F4' | 'CHAMP'
 
-export type GameStatus = 'scheduled' | 'active' | 'final'
+export type GameStatus = 'scheduled' | 'live' | 'final'
 
 // === Derived types ===
 
@@ -106,9 +110,11 @@ export const OWNER_COLORS = [
 ]
 
 export function getGameStatus(game: Game): GameStatus {
+  // Use explicit status field if present, fall back to score-based derivation
+  if (game.status) return game.status
   if (game.scoreA === null && game.scoreB === null) return 'scheduled'
   if (game.scoreA !== null && game.scoreB !== null) return 'final'
-  return 'active'
+  return 'scheduled'
 }
 
 export function getGameWinner(game: Game): 'A' | 'B' | null {
@@ -155,7 +161,7 @@ export function generateInitialGames(): Game[] {
   let id = 1
   for (const round of ROUNDS_IN_ORDER) {
     for (let i = 0; i < ROUND_GAME_COUNTS[round]; i++) {
-      games.push({ id: id++, round, teamA: '', teamB: '', scoreA: null, scoreB: null })
+      games.push({ id: id++, round, teamA: '', teamB: '', scoreA: null, scoreB: null, status: 'scheduled', scoreLocked: false, espnId: null })
     }
   }
   return games

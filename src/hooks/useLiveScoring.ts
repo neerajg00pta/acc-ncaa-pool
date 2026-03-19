@@ -88,8 +88,10 @@ export function useLiveScoring(
         await saveGames(prev =>
           prev.map(g => updateMap.get(g.id) ?? g)
         )
-        await onRefresh()
       }
+
+      // Always refresh data so all components see latest state
+      await onRefresh()
 
       setError(null)
       setLastPoll(new Date())

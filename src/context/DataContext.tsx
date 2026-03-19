@@ -11,6 +11,8 @@ interface DataState {
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
+  /** Increments on every successful poll — forces consumer re-renders */
+  tick: number
 }
 
 const DataContext = createContext<DataState | null>(null)
@@ -22,6 +24,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tick, setTick] = useState(0)
 
   const refresh = useCallback(async () => {
     try {
@@ -31,6 +34,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setSquares(data.squares)
       setGames(data.games)
       setError(null)
+      setTick(t => t + 1)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
@@ -45,7 +49,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [refresh])
 
   return (
-    <DataContext.Provider value={{ config, users, squares, games, loading, error, refresh }}>
+    <DataContext.Provider value={{ config, users, squares, games, loading, error, refresh, tick }}>
       {children}
     </DataContext.Provider>
   )

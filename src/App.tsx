@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { DataProvider } from './context/DataContext'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { LiveScoringProvider } from './context/LiveScoringContext'
 import { Layout } from './components/Layout'
 import { HomePage } from './pages/Home'
 import { AdminPage } from './pages/Admin'
@@ -15,6 +16,7 @@ export default function App() {
       <DataProvider>
         <AuthProvider>
           <ToastProvider>
+            <LiveScoringProvider>
             <Layout>
               <Routes>
                 <Route path="/" element={<HomePage />} />
@@ -23,6 +25,7 @@ export default function App() {
                 <Route path="/admin/games" element={<AdminGamesPage />} />
               </Routes>
             </Layout>
+            </LiveScoringProvider>
             <Toasts />
           </ToastProvider>
         </AuthProvider>

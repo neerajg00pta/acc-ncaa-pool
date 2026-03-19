@@ -9,7 +9,7 @@ import {
   ROUND_LABELS, ROUND_PAYOUTS, ROUNDS_IN_ORDER,
   generateInitialGames,
 } from '../lib/types'
-import { useLiveScoring } from '../hooks/useLiveScoring'
+import { useLiveScoringState } from '../context/LiveScoringContext'
 import type { MatchResult } from '../lib/espn'
 import styles from './AdminGames.module.css'
 
@@ -20,8 +20,8 @@ export function AdminGamesPage() {
   const [saving, setSaving] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
 
-  // Live scoring hook — only active when config.liveScoring is on
-  const liveScoring = useLiveScoring(config.liveScoring, games, refresh)
+  // Live scoring state from app-wide context
+  const liveScoring = useLiveScoringState()
 
   // Build match lookup: poolGameId → MatchResult
   const matchMap = new Map<number, MatchResult>()

@@ -140,8 +140,7 @@
   font-size: 9px;
   font-weight: 700;
   color: var(--accent-green);
-  margin-left: 8px;
-  min-width: 28px;
+  margin-right: 6px;
   animation: livePulse 1.5s infinite;
 }
 

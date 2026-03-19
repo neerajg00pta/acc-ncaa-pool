@@ -164,7 +164,7 @@
 }
 
 @media (min-width: 768px) {
-  .cell { min-height: var(--cell-size); }
+  .cell { min-height: 0; }
 }
 
 .cell:hover {
@@ -181,7 +181,7 @@
 }
 
 .cellMine {
-  border-color: rgba(240, 165, 0, 0.35) !important;
+  box-shadow: inset 0 0 0 2px rgba(240, 165, 0, 0.5);
 }
 
 .cellDimmed {
@@ -190,7 +190,7 @@
 }
 
 .cellSearchMatch {
-  border-color: var(--accent-gold) !important;
+  box-shadow: inset 0 0 0 2px var(--accent-gold);
   opacity: 1;
 }
 
@@ -237,7 +237,7 @@
 
 .cellSelected {
   background: rgba(88, 166, 255, 0.12) !important;
-  border-color: var(--accent-blue) !important;
+  box-shadow: inset 0 0 0 2px var(--accent-blue);
 }
 
 .ownerName {

@@ -136,11 +136,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.liveBadge {
+.liveBadgeSlot {
   font-size: 9px;
   font-weight: 700;
   color: var(--accent-green);
-  margin-right: 6px;
+  width: 30px;
+  text-align: center;
+  flex-shrink: 0;
   animation: livePulse 1.5s infinite;
 }
 

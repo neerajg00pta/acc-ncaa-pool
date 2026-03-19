@@ -17,7 +17,7 @@ interface GridProps {
 }
 
 export function Grid({ searchQuery }: GridProps) {
-  const { config, users, squares, games, refresh, tick } = useData()
+  const { config, users, squares, games, refresh } = useData()
   const { currentUser, isAdmin } = useAuth()
   const { addToast } = useToast()
   const [claiming, setClaiming] = useState<string | null>(null)
@@ -49,9 +49,6 @@ export function Grid({ searchQuery }: GridProps) {
     users.forEach(u => map.set(u.id, u.fullName || u.name))
     return map
   }, [users])
-
-  // Count games with scores for debug display
-  const gamesWithScores = games.filter(g => g.scoreA !== null && g.scoreB !== null).length
 
   // Compute game-to-square mappings and payouts
   const gameSquareMap = useMemo(() => {
@@ -264,10 +261,6 @@ export function Grid({ searchQuery }: GridProps) {
 
   return (
     <div className={styles.gridWrapper}>
-      {/* Debug: shows poll tick + scored games — remove after confirming auto-update works */}
-      <div style={{ fontSize: 10, color: '#888', textAlign: 'right', padding: '0 4px 2px' }}>
-        poll #{tick} &middot; {gamesWithScores} scored
-      </div>
       {/* Winner label + admin lock toggle */}
       <div className={styles.axisLabelRow}>
         <div className={styles.axisLabelCorner}>

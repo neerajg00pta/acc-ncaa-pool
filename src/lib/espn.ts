@@ -1,4 +1,10 @@
 import type { Game, Round } from './types'
+import { ROUNDS_IN_ORDER } from './types'
+
+/** Numeric order of rounds for progression checks */
+const ROUND_ORDER: Record<Round, number> = Object.fromEntries(
+  ROUNDS_IN_ORDER.map((r, i) => [r, i])
+) as Record<Round, number>
 
 // === ESPN API Types ===
 
@@ -75,12 +81,19 @@ export async function fetchESPNScoreboard(date?: string): Promise<ESPNGame[]> {
 /** Map ESPN note headlines to pool round codes */
 function parseRound(headline: string): Round | null {
   const h = headline.toLowerCase()
+  // Primary patterns (most common ESPN format)
   if (h.includes('1st round')) return 'R64'
   if (h.includes('2nd round')) return 'R32'
   if (h.includes('sweet 16') || h.includes('sweet sixteen')) return 'S16'
   if (h.includes('elite 8') || h.includes('elite eight')) return 'E8'
   if (h.includes('final four') || h.includes('semifinal')) return 'F4'
   if (h.includes('championship') || h.includes('national championship')) return 'CHAMP'
+  // Fallback patterns (alternate ESPN/NCAA naming)
+  if (h.includes('regional semifinal')) return 'S16'
+  if (h.includes('regional final')) return 'E8'
+  if (h.includes('national semifinal')) return 'F4'
+  if (h.includes('3rd round')) return 'S16'
+  if (h.includes('4th round')) return 'E8'
   return null
 }
 
@@ -139,6 +152,10 @@ export function matchGames(espnGames: ESPNGame[], poolGames: Game[]): MatchResul
     if (!pool.espnId) continue
     const espn = espnGames.find(e => e.id === pool.espnId)
     if (!espn) continue
+    // Warn if ESPN now reports a different round than the pool slot
+    if (espn.round && pool.round !== espn.round) {
+      console.warn(`[LiveScoring] Round mismatch: game #${pool.id} is ${pool.round} but ESPN says ${espn.round}`)
+    }
     usedEspnIds.add(espn.id)
     usedPoolIds.add(pool.id)
     const teamAMapping = resolveTeamAMapping(pool, espn)
@@ -170,6 +187,14 @@ export function matchGames(espnGames: ESPNGame[], poolGames: Game[]): MatchResul
 
   // Pass 3: auto-assign unmatched ESPN games to empty pool slots in the same round.
   // This is how games first get populated. Empty = no teamA and no teamB and no espnId.
+  //
+  // Round progression guard: don't auto-assign to rounds earlier than the latest
+  // round that already has live/final games. This prevents a Sweet 16 game from
+  // landing in an R64 slot when R32 games have already been played.
+  const latestActiveRound = poolGames
+    .filter(g => g.status !== 'scheduled')
+    .reduce((max, g) => Math.max(max, ROUND_ORDER[g.round] ?? -1), -1)
+
   for (const espn of espnGames) {
     if (usedEspnIds.has(espn.id)) continue
     if (!espn.round) continue // can't assign without knowing the round
@@ -179,6 +204,12 @@ export function matchGames(espnGames: ESPNGame[], poolGames: Game[]): MatchResul
       p => !usedPoolIds.has(p.id) && p.round === espn.round && !p.teamA && !p.teamB && !p.espnId
     )
     if (!emptySlot) continue
+
+    // Don't assign to rounds that are behind the tournament's current progress
+    if (ROUND_ORDER[emptySlot.round] < latestActiveRound) {
+      console.warn(`[LiveScoring] Skipping auto-assign to game #${emptySlot.id} (${emptySlot.round}) — tournament has progressed past this round`)
+      continue
+    }
 
     usedEspnIds.add(espn.id)
     usedPoolIds.add(emptySlot.id)

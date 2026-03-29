@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background with rounded corners -->
+  <rect width="512" height="512" rx="80" fill="#0d1117"/>
+  <!-- Grid lines -->
+  <g stroke="#2d333b" stroke-width="3">
+    <!-- Vertical grid lines (5 columns) -->
+    <line x1="102" y1="40" x2="102" y2="472"/>
+    <line x1="204" y1="40" x2="204" y2="472"/>
+    <line x1="307" y1="40" x2="307" y2="472"/>
+    <line x1="409" y1="40" x2="409" y2="472"/>
+    <!-- Horizontal grid lines (5 rows) -->
+    <line x1="40" y1="102" x2="472" y2="102"/>
+    <line x1="40" y1="204" x2="472" y2="204"/>
+    <line x1="40" y1="307" x2="472" y2="307"/>
+    <line x1="40" y1="409" x2="472" y2="409"/>
+  </g>
+  <!-- Basketball -->
+  <circle cx="256" cy="256" r="140" fill="#e86c2a" stroke="#c45a1f" stroke-width="6"/>
+  <!-- Basketball seam lines -->
+  <g stroke="#1a1a1a" stroke-width="5" fill="none" stroke-linecap="round">
+    <!-- Vertical seam -->
+    <line x1="256" y1="116" x2="256" y2="396"/>
+    <!-- Horizontal seam -->
+    <line x1="116" y1="256" x2="396" y2="256"/>
+    <!-- Left curve -->
+    <path d="M 200 120 Q 170 256 200 392"/>
+    <!-- Right curve -->
+    <path d="M 312 120 Q 342 256 312 392"/>
+  </g>
+</svg>

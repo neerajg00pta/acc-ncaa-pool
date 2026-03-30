@@ -314,13 +314,17 @@ function GameRow({
       {liveEnabled && (
         <td className={styles.espnCell}>
           {espnMatch ? (
-            espnMatch.espnGame.status === 'scheduled' ? (
-              <span className={styles.espnPre} title={`Linked — ${espnMatch.espnGame.detail}`}>
-                &#x1F7E1;
-              </span>
-            ) : (
+            espnMatch.espnGame.status === 'live' ? (
               <span className={styles.espnLive} title={espnMatch.espnGame.detail}>
                 &#x1F7E2;
+              </span>
+            ) : espnMatch.espnGame.status === 'final' ? (
+              <span className={styles.espnFinal} title={`Final — ${espnMatch.espnGame.detail}`}>
+                &#x26AA;
+              </span>
+            ) : (
+              <span className={styles.espnPre} title={`Linked — ${espnMatch.espnGame.detail}`}>
+                &#x1F7E1;
               </span>
             )
           ) : (game.teamA || game.teamB) ? (

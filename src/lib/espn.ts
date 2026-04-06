@@ -162,13 +162,17 @@ export function matchGames(espnGames: ESPNGame[], poolGames: Game[]): MatchResul
     results.push({ poolGameId: pool.id, espnGame: espn, teamAMapping })
   }
 
-  // Pass 2: match by team name for games without espnId but with team names
+  // Pass 2: match by team name for games without espnId but with team names.
+  // Only match within the same round to prevent cross-round collisions
+  // (e.g., "Michigan" in S16 matching "Michigan" in Championship).
   for (const pool of poolGames) {
     if (usedPoolIds.has(pool.id)) continue
     if (!pool.teamA && !pool.teamB) continue
 
     for (const espn of espnGames) {
       if (usedEspnIds.has(espn.id)) continue
+      // Round must match to prevent cross-round fuzzy collisions
+      if (espn.round && espn.round !== pool.round) continue
 
       const aMatchesHome = teamsMatch(pool.teamA, espn.teams.home.name, espn.teams.home.abbreviation)
       const aMatchesAway = teamsMatch(pool.teamA, espn.teams.away.name, espn.teams.away.abbreviation)

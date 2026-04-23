@@ -5,7 +5,7 @@ import type { Config, User, Square, Game } from './types'
 
 export async function getConfig(): Promise<Config> {
   const { data, error } = await supabase
-    .from('config')
+    .from('ncaa_config')
     .select('*')
     .eq('id', 1)
     .single()
@@ -21,7 +21,7 @@ export async function getConfig(): Promise<Config> {
 
 export async function getUsers(): Promise<User[]> {
   const { data, error } = await supabase
-    .from('users')
+    .from('ncaa_users')
     .select('*')
     .order('created_at')
   if (error) throw error
@@ -38,7 +38,7 @@ export async function getUsers(): Promise<User[]> {
 
 export async function getSquares(): Promise<Square[]> {
   const { data, error } = await supabase
-    .from('squares')
+    .from('ncaa_squares')
     .select('*')
   if (error) throw error
   return (data ?? []).map(s => ({
@@ -51,7 +51,7 @@ export async function getSquares(): Promise<Square[]> {
 
 export async function getGames(): Promise<Game[]> {
   const { data, error } = await supabase
-    .from('games')
+    .from('ncaa_games')
     .select('*')
     .order('id')
   if (error) throw error
@@ -82,7 +82,7 @@ export async function fetchAllData() {
 
 export async function updateConfig(updater: (c: Config) => Config): Promise<Config> {
   // Read fresh from Supabase (not cached raw URL)
-  const { data: row, error: readErr } = await supabase.from('config').select('*').eq('id', 1).single()
+  const { data: row, error: readErr } = await supabase.from('ncaa_config').select('*').eq('id', 1).single()
   if (readErr) throw readErr
   const current: Config = {
     boardLocked: row.board_locked,
@@ -93,7 +93,7 @@ export async function updateConfig(updater: (c: Config) => Config): Promise<Conf
   }
   const updated = updater(current)
   const { error } = await supabase
-    .from('config')
+    .from('ncaa_config')
     .update({
       board_locked: updated.boardLocked,
       max_squares_per_person: updated.maxSquaresPerPerson,
@@ -118,7 +118,7 @@ export async function createUser(user: { name: string; email: string; fullName?:
     paid: false,
     createdAt: new Date().toISOString(),
   }
-  const { error } = await supabase.from('users').insert({
+  const { error } = await supabase.from('ncaa_users').insert({
     id: newUser.id,
     name: newUser.name,
     email: newUser.email,
@@ -142,13 +142,13 @@ export async function saveUsers(updater: (users: User[]) => User[]): Promise<Use
   // Deleted
   const deletedIds = [...currentIds].filter(id => !updatedIds.has(id))
   if (deletedIds.length > 0) {
-    const { error } = await supabase.from('users').delete().in('id', deletedIds)
+    const { error } = await supabase.from('ncaa_users').delete().in('id', deletedIds)
     if (error) throw error
   }
 
   // Upsert all remaining
   if (updated.length > 0) {
-    const { error } = await supabase.from('users').upsert(
+    const { error } = await supabase.from('ncaa_users').upsert(
       updated.map(u => ({
         id: u.id,
         name: u.name,
@@ -168,14 +168,14 @@ export async function saveUsers(updater: (users: User[]) => User[]): Promise<Use
 // === Square writes ===
 
 export async function claimSquare(row: number, col: number, userId: string): Promise<void> {
-  const { error } = await supabase.from('squares').insert({
+  const { error } = await supabase.from('ncaa_squares').insert({
     row, col, user_id: userId, claimed_at: new Date().toISOString(),
   })
   if (error) throw error
 }
 
 export async function unclaimSquare(row: number, col: number): Promise<void> {
-  const { error } = await supabase.from('squares').delete().eq('row', row).eq('col', col)
+  const { error } = await supabase.from('ncaa_squares').delete().eq('row', row).eq('col', col)
   if (error) throw error
 }
 
@@ -190,14 +190,14 @@ export async function saveSquares(updater: (squares: Square[]) => Square[]): Pro
   // Deleted squares
   const deleted = current.filter(s => !updatedKeys.has(toKey(s)))
   for (const s of deleted) {
-    const { error } = await supabase.from('squares').delete().eq('row', s.row).eq('col', s.col)
+    const { error } = await supabase.from('ncaa_squares').delete().eq('row', s.row).eq('col', s.col)
     if (error) throw error
   }
 
   // Added squares
   const added = updated.filter(s => !currentKeys.has(toKey(s)))
   if (added.length > 0) {
-    const { error } = await supabase.from('squares').insert(
+    const { error } = await supabase.from('ncaa_squares').insert(
       added.map(s => ({
         row: s.row,
         col: s.col,
@@ -218,7 +218,7 @@ export async function saveGames(updater: (games: Game[]) => Game[]): Promise<Gam
   const updated = updater(current)
 
   if (updated.length > 0) {
-    const { error } = await supabase.from('games').upsert(
+    const { error } = await supabase.from('ncaa_games').upsert(
       updated.map(g => ({
         id: g.id,
         round: g.round,
